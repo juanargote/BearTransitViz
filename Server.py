@@ -6,7 +6,7 @@ import SocketServer
 # minimal web server.  serves files relative to the
 # current directory.
 
-PORT = 8009
+PORT = 8003
 
 Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
 
