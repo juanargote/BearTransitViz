@@ -1,14 +1,96 @@
 var preData = []
 var preBus = []
-// setInterval(function(){
-// 	predictArrivals()
 
-// 	//console.log(buses, stops)
+pre = {
+	"buses":[],
+	"stops":[]
+}
+
+function processPrediction(){
+	var time = new Date().getTime()/1000
+	pre.time = time
+	pre.buses = d3.entries(buses).filter(function(d){return d.value.pm != undefined})
+
+	pre.stops = stops.filter(function(d){return d.arrivals[0] != undefined && d.pm != undefined}).map(function(d){
+		if (d.arrivals[0] - (time - d.ts) < 0) {
+			d.expired = true
+		} else {
+			d.expired = false
+		}
+		return d
+	})
+
+	pre.stop = d3.scale.linear().domain(pre.stops.map(function(d){return d.pm})).range(pre.stops.map(function(d,i){return i}))
 
 
-// },1000)
+	pre.buses.forEach(function(d){
+
+		// link the bus to the next stop
+		var lastStop = Math.floor(pre.stop(d.value.pm))
+		var nextStop = lastStop + 1
+		if (lastStop = -1) {
+			lastStop = pre.stops.length + lastStop
+		}
+		if (lastStop + 1 == pre.stops.length ) {
+			nextStop = 0
+		}
+		d.value.nextStop = nextStop
+		d.value.speed = (pre.stops[nextStop].pm - d.value.pm) / pre.stops[nextStop].arrivals[0] // speed in km/s
+		
+		if (d.value.speed < 15/3600) {
+			console.log("veh too slow, missing prediction?")
+		}
+
+		if (pre.stops[nextStop].expired && pre.stops[nextStop].ts > d.value.ts) {
+			console.log("the arrival has expired and this prediction came later than the bus: the bus is not updating")
+		}
+
+		pre.stops[nextStop].link = d.key
+
+		if (pre.stops[nextStop].arrivals[1] != undefined) {
+			var interpolation = d3.scale.linear()
+				.domain([pre.stops[lastStop].pm, pre.stops[nextStop]])
+				.range([pre.stops[lastStop].arrivals[0], pre.stops[nextStop].arrivals[1]])
+			d.value.nextArrival = interpolation(d.value.pm)
+		} else {
+			d.value.nextArrival = pre.stops[lastStop].arrivals[0] + d.value.pm / d.speed
+		}
+		
+	})
+	updatePredictions()
+}
+
+function updatePredictions(){
+	var time = new Date().getTime()/1000
+	pre.events = []
+	pre.buses.forEach(function(d){
+		d.value.pm = d.value.pm + (time - pre.time)*d.value.speed
+		pre.events.push({"pm":d.value.pm,"time":d.value.nextArrival})
+		pre.events.push({"pm":d.value.pm,"time":0})
+	})
+	pre.stops.forEach(function(stop){
+		pre.buses.filter(function(bus){return bus.key == stop.link }).forEach(function(bus){
+			if (bus.value.pm > stop.pm) {
+				//stop.arrivals.shift()
+			}
+		})
+		stop.arrivals.forEach(function(arrival){
+			arrival = arrival - (time - pre.time)
+		})
+		pre.events.push({"pm":stop.pm, "time": stop.arrivals[0]})
+	})
+	pre.events.sort(function(a,b){
+		if (a.pm == b.pm) { return b.time - a.time} else {
+		return a.pm - b.pm}})
+
+	predictions.domain(pre.events.map(function(e){return e.pm})).range(pre.events.map(function(e){return e.time}))
+	pre.time = time
+	paintRoute(shape)
+}
 
 function predictArrivals(){
+
+
 	// Validating the data
 	var horribleData = false
 	preData = stops.filter(function(d,i){ return (d.pm != undefined && d.arrivals != undefined)}).sort(function(a,b){return a.pm - b.pm})

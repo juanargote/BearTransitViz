@@ -29,7 +29,7 @@ function initializeFirebase() {
             shape = s
             predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
               .range(shape.geometry.coordinates.map(function(d,i){return i}))
-            paintRoute(shape)
+            //paintRoute(shape)
 
             d3buses.each(addBus)
               .each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) //[d.value.lon, d.value.lat]
@@ -52,25 +52,25 @@ function initializeFirebase() {
       
       f.on("child_changed", function(s) {
     
-        //buses[s.name()] = s.val()
-
-        // var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
+        buses[s.name()] = s.val()
+        processPrediction()
+        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         
-        // d3buses.enter().append("svg") // in case there was a new bus
-        //   .attr("class","buses")
-        //   .attr("id", function(d){return d.key})
+        d3buses.enter().append("svg") // in case there was a new bus
+          .attr("class","buses")
+          .attr("id", function(d){return d.key})
 
-        // d3buses.exit().remove() // should never happen but in case one bus disapers this removes it
+        d3buses.exit().remove() // should never happen but in case one bus disapers this removes it
 
-        // d3.select("#" + s.name()).each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape))})
-        // d3.select("#" + s.name()).selectAll("circle").style("stroke", "gold")
-        // d3.select("#" + s.name()).selectAll("circle").transition().duration(10000).style("stroke", "white")
-        // d3.timer(function(){
-        //   if (shape != undefined){
-        //     predictArrivals()
-        //     return true
-        //   }
-        // })
+        d3.select("#" + s.name()).each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape))})
+        d3.select("#" + s.name()).selectAll("circle").style("stroke", "gold")
+        d3.select("#" + s.name()).selectAll("circle").transition().duration(10000).style("stroke", "white")
+        d3.timer(function(){
+          if (shape != undefined){
+            //predictArrivals()
+            return true
+          }
+        })
       });
 
       f.on("child_removed", function(s) {
@@ -78,7 +78,7 @@ function initializeFirebase() {
         //delete buses[s.name()];
         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         d3buses.exit().remove()
-
+        processPrediction()
       });
 
       fStops.once("value",function(s){
@@ -209,25 +209,18 @@ function paintLink(canvas){
     var projectedLink = canvas.datum()
     var ctx = canvas.node().getContext("2d");
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);
-    lingrad.addColorStop(0, color(predictions(projectedLink[0][2])));
-    var locBuses = d3.entries(buses).filter(function(d){return (d.value.pm != undefined)})
+    var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
-     locBuses.forEach(function(d){
-      
-      if (projectedLink[0][2] <= d.value.pm && d.value.pm <= projectedLink[1][2]) {
-        var loc = (d.value.pm - projectedLink[0][2])/(projectedLink[1][2]-projectedLink[0][2])
-        lingrad.addColorStop(loc, color(predictions(d.value.pm)));
-        lingrad.addColorStop(loc, color(0));
-        
-      } else {
-        //if (predictions(projectedLink[0][2]) > predictions(projectedLink[1][2])) { console.log("WTF")}
-        if ((projectedLink[0][2]) > (projectedLink[1][2])) { console.log("WTF")}
+    pre.buses.forEach(function(bus){
+      if (projectedLink[0][2] <= bus.value.pm && bus.value.pm <= projectedLink[1][2]) {
+        var loc = (bus.value.pm - projectedLink[0][2])/linkLength
+        lingrad.addColorStop(loc, color(predictions(bus.value.pm - 0.001)));
+        lingrad.addColorStop(loc, color(predictions(bus.value.pm + 0.001)))
       }
-    
     })
-    lingrad.addColorStop(1, color(predictions(projectedLink[0][2])));
-
-
+ 
+    lingrad.addColorStop(0, color(predictions(projectedLink[0][2])));
+    lingrad.addColorStop(1, color(predictions(projectedLink[1][2])));
 
     ctx.lineWidth = 8
     ctx.lineCap = "round"
