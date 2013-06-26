@@ -13,34 +13,35 @@
       margin: 0;
       padding: 0;
     }
-    
-    </style>
-  <body>
-    <div id="map-canvas"></div>
-    <script type="text/javascript" src="GoogleMap.js"></script>
-    <script type="text/javascript" src="firebus.js"></script>
-    <script type="text/javascript" src="pre.js"></script>
-    <script type="text/javascript">
-    var s
-    predictions.range([30,40])
-    
-    predictions = function(pm){
-     var time = new Date().getTime()/1000
-
-      return pre.predict(pm) - time 
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
     }
 
-    d3.timer(function(e){
-      if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){
-        pre.process()
-        pre.predictions()
+    .prediction path,
+    .prediction line {
+      fill: none;
+      stroke: orange;
+      shape-rendering: crispEdges;
+    }
+    </style>
+  <body>
+    <script type="text/javascript" src="Fig.js"></script>
+    <script type="text/javascript" src="pre.js"></script>
 
+    <script type="text/javascript">
+    var s
 
-        paintRoute(shape)
-      }
-      return s
-    })
-
+d3.timer(function(e){
+  if (pre.buses != undefined && pre.stops != undefined && pre.links != undefined){
+    pre.process()
+    pre.predictions()
+    fig.redraw() 
+  }
+  return s
+})
     </script>
   </body>
 </html>

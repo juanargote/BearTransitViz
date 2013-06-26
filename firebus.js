@@ -1,6 +1,6 @@
 
 var shape
-var color = d3.scale.linear().range(["green", "red"]).domain([0, 1*60])
+var color = d3.scale.linear().range(["navy", "gold"]).domain([0, 1.5*60])
 var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
@@ -25,10 +25,11 @@ function initializeFirebase() {
         d3buses.exit().remove()
 
         d3.json("P.json",function(data){
+          pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
           data.features.forEach(function(s){ // for each shape
             shape = s
-            predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
-              .range(shape.geometry.coordinates.map(function(d,i){return i}))
+            // predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
+            //   .range(shape.geometry.coordinates.map(function(d,i){return i}))
             //paintRoute(shape)
 
             d3buses.each(addBus)
@@ -53,7 +54,7 @@ function initializeFirebase() {
       f.on("child_changed", function(s) {
     
         buses[s.name()] = s.val()
-        processPrediction()
+        //processPrediction()
         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         
         d3buses.enter().append("svg") // in case there was a new bus
@@ -78,7 +79,7 @@ function initializeFirebase() {
         //delete buses[s.name()];
         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         d3buses.exit().remove()
-        processPrediction()
+        //processPrediction()
       });
 
       fStops.once("value",function(s){
@@ -212,15 +213,23 @@ function paintLink(canvas){
     var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
     pre.buses.forEach(function(bus){
-      if (projectedLink[0][2] <= bus.value.pm && bus.value.pm <= projectedLink[1][2]) {
-        var loc = (bus.value.pm - projectedLink[0][2])/linkLength
-        lingrad.addColorStop(loc, color(predictions(bus.value.pm - 0.001)));
-        lingrad.addColorStop(loc, color(predictions(bus.value.pm + 0.001)))
+      if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
+        var loc = (bus.pm - projectedLink[0][2])/linkLength
+        if (0 <= 0 && loc <= 1) {
+          var c1 = predictions(bus.pm - 0.001)
+          if (c1 != undefined){lingrad.addColorStop(loc, color(c1))}
+          var c2 = predictions(bus.pm + 0.001)
+          if (c2 != undefined){lingrad.addColorStop(loc, color(c2))}
+        } else {
+          console.log(bus)
+        }
       }
     })
- 
-    lingrad.addColorStop(0, color(predictions(projectedLink[0][2])));
-    lingrad.addColorStop(1, color(predictions(projectedLink[1][2])));
+
+    var c1 = (predictions(projectedLink[0][2]))
+    var c2 = (predictions(projectedLink[1][2]))
+    if (c1 != undefined){lingrad.addColorStop(0, color(c1))}
+    if (c2 != undefined){lingrad.addColorStop(1, color(c2)); }
 
     ctx.lineWidth = 8
     ctx.lineCap = "round"
