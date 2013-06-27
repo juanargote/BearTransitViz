@@ -82,18 +82,18 @@ pre.process = function(){
     try {
       var interpolate
 
-      if (Math.abs(bus.pm - next.pm) < 0) {
-        console.log("bus approaching")
-        if (bus.speed == undefined) {
-          console.log("no speed")
-          bus.speed = 15/3600
-        }
-        interpolate = function(a){
-          return bus.next + (time - bus.ts)/1000
-        }
-      } else {
+      // if (Math.abs(bus.pm - next.pm) < 0) {
+      //   console.log("bus approaching")
+      //   if (bus.speed == undefined) {
+      //     console.log("no speed")
+      //     bus.speed = 15/3600
+      //   }
+      //   interpolate = function(a){
+      //     return bus.next + (time - bus.ts)/1000
+      //   }
+      // } else {
         
-      }
+      // }
       var dis
       if (i == pre.stops.length - 1) {
         dis = (pre.links.slice(-1)[0] - bus.pm)
@@ -110,15 +110,20 @@ pre.process = function(){
         if (bus.speed == undefined) {bus.speed = 15/3600}
       }
 
-
-      interpolate = d3.scale.linear().domain([last.pm, nextpm]).range([last.arrivals[0] + last.ts, next.arrivals[1] + next.ts])
-      
+      // if (last.arrivals[0] + last.ts > time/1000 && last.pm < bus.pm) {
+      //   //console.log([last, next])
+      // interpolate = d3.scale.linear().domain([last.pm, nextpm]).range([last.arrivals[0] + last.ts, next.arrivals[1] + next.ts])
+      // bus.next = interpolate(bus.pm)
+      // } else {
+      //   //console.log([last, next])
+      // }
+      bus.next = time/1000 + 120
       bus.pm = bus.pm + (time -bus.ts)/1000 * bus.speed
       //console.log(pre.links)
       if (bus.pm > pre.links.slice(-1)[0]){ bus.pm = bus.pm - pre.links.slice(-1)[0]}
       bus.ts = time
       
-      bus.next = interpolate(bus.pm)
+      
       
     } catch (err) {}
   })

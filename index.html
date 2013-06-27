@@ -20,6 +20,7 @@
     <script type="text/javascript" src="GoogleMap.js"></script>
     <script type="text/javascript" src="firebus.js"></script>
     <script type="text/javascript" src="pre.js"></script>
+    <script type="text/javascript" src="controls.js"></script>
     <script type="text/javascript">
     var s
     predictions.range([30,40])
@@ -31,6 +32,7 @@
     }
 
     d3.timer(function(e){
+      //console.log(e)
       if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){
         pre.process()
         pre.predictions()

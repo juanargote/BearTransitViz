@@ -217,9 +217,9 @@ function paintLink(canvas){
         var loc = (bus.pm - projectedLink[0][2])/linkLength
         if (0 <= 0 && loc <= 1) {
           var c1 = predictions(bus.pm - 0.001)
-          if (c1 != undefined){lingrad.addColorStop(loc, color(c1))}
+          if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
           var c2 = predictions(bus.pm + 0.001)
-          if (c2 != undefined){lingrad.addColorStop(loc, color(c2))}
+          if (!isNaN(c2)){lingrad.addColorStop(loc, color(c2))}
         } else {
           console.log(bus)
         }
@@ -228,8 +228,9 @@ function paintLink(canvas){
 
     var c1 = (predictions(projectedLink[0][2]))
     var c2 = (predictions(projectedLink[1][2]))
-    if (c1 != undefined){lingrad.addColorStop(0, color(c1))}
-    if (c2 != undefined){lingrad.addColorStop(1, color(c2)); }
+
+    if (!isNaN(c1)){lingrad.addColorStop(0, color(c1))} else {lingrad.addColorStop(0, "black")}
+    if (!isNaN(c2)){lingrad.addColorStop(1, color(c2)); } else {lingrad.addColorStop(0, "black")}
 
     ctx.lineWidth = 8
     ctx.lineCap = "round"
