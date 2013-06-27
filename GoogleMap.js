@@ -12,6 +12,7 @@ function initializeOverlay() {
 		
 		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("id","Overlay")
 		layer.append("div").attr("id","OverlayCanvas")
+		layer.append("div").attr("id","CatchmentAreas")
 		layer.append("div").attr("id","OverlaySvg")
 		
 		overlay.draw = function() {
@@ -49,6 +50,7 @@ function initializeMap() {
 function reprojectOverlays(){
 	d3.selectAll(".buses").each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) // this function is defined in firebus.js
 	d3.selectAll(".stops").each(function(d){ relocate(this, d.geometry.coordinates)}) // this function is defined in firebus.js
+	d3.selectAll(".catchment").each(function(d){ relocate(this, d.geometry.coordinates)})
 	if (shape != undefined) {paintRoute(shape)} // this function is defined in firebus.js
 }
 
