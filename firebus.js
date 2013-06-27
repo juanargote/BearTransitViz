@@ -5,6 +5,22 @@ var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
 var stopBisect = d3.scale.linear()
+// Catchment Areas Variables
+var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
+var catchmentStopId = null
+var center
+var catch1 = new google.maps.Circle()
+var catch2 = new google.maps.Circle()
+var catch1Options = {fillColor:'gray',
+                      fillOpacity:0.5,
+                      strokeColor:"black",
+                      strokeOpacity:1,
+                      strokeWeight:2}
+var catch2Options = {fillColor:'gray',
+                      fillOpacity:0.25,
+                      strokeColor:"black",
+                      strokeOpacity:1,
+                      strokeWeight:2}
 
 function initializeFirebase() {
   var f = new Firebase("https://beartransitviz.firebaseio.com/bear-transit/raw_location");
@@ -69,6 +85,10 @@ function initializeFirebase() {
         d3.timer(function(){
           if (shape != undefined){
             //predictArrivals()
+            // Dynamically adjust the size of the catchment areas if necessary
+            if (catchmentStopId != null) {
+              setCatchmentAreas(catchmentStopId,center)
+            }
             return true
           }
         })
@@ -86,7 +106,7 @@ function initializeFirebase() {
         stops = s.val()
         console.log(stops)
         
-var coordinates = d3.entries(stops).map(function(d){ return d.value.pm})
+      var coordinates = d3.entries(stops).map(function(d){ return d.value.pm})
         console.log(coordinates)
         
         // for (var stop in stops) {
@@ -112,8 +132,34 @@ function relocate(svg, array) {
     .style("top",(xy[1] - d3.select(svg).style("height").slice(0,-2)/2) + "px")
 }
 
+function setCatchmentAreas(stop_id,center){
+
+  // Try to erase existing catchment ares
+  catch1.setMap(null)
+  catch2.setMap(null)
+  
+
+    try{
+          arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
+          r1 = 1000*(arrivals[0]/3600)*walkingSpeed
+          r2 = 1000*(arrivals[1]/3600)*walkingSpeed
+          catch1.setRadius(r1)
+          catch2.setRadius(r2)
+          // Draw two concentric circles using google map API
+          catch1.setOptions(catch1Options)
+          catch1.setCenter(center)
+          catch1.setMap(map)
+
+          catch2.setOptions(catch2Options)
+          catch2.setCenter(center)
+          catch2.setMap(map)
+        } catch (err) {
+          console.log('index not found')
+        }  
+}
+
 function addStop(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
-  var radius = 3
+  var radius = 7.5
   var border = 4
   var d3Stops = d3.select(this)
 
@@ -121,9 +167,24 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
     .on("click", function(d){
-
-      map.panTo(new google.maps.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0]))
+      center = new google.maps.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0])
+      map.panTo(center)
       console.log(d)
+      if (catchmentStopId == null || catchmentStopId != d.properties.stop_id){
+        catchmentStopId = d.properties.stop_id
+        setCatchmentAreas(d.properties.stop_id,center)
+      } else {
+        catchmentStopId = null
+        catch1.setMap(null)
+        catch2.setMap(null)
+      }
+      
+    })
+    .on("mouseover", function(){
+      d3.select(this).style("fill", "red").style("cursor","pointer")
+    })
+    .on("mouseout", function(){
+      d3.select(this).style("fill", "navy")
     })
 
   d3.select(this)
