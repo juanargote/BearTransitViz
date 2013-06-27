@@ -110,31 +110,38 @@ pre.process = function(){
         if (bus.speed == undefined) {bus.speed = 15/3600}
       }
 
-      // if (last.arrivals[0] + last.ts > time/1000 && last.pm < bus.pm) {
-      //   //console.log([last, next])
-      // interpolate = d3.scale.linear().domain([last.pm, nextpm]).range([last.arrivals[0] + last.ts, next.arrivals[1] + next.ts])
-      // bus.next = interpolate(bus.pm)
-      // } else {
-      //   //console.log([last, next])
-      // }
+
       bus.next = time/1000 + 120
+      if (bus.pm == undefined) {console.log("WTF")}
       bus.pm = bus.pm + (time -bus.ts)/1000 * bus.speed
+      
       //console.log(pre.links)
       if (bus.pm > pre.links.slice(-1)[0]){ bus.pm = bus.pm - pre.links.slice(-1)[0]}
       bus.ts = time
+      i = pre.lastStop(bus.pm)
+      bus.last = pre.stops[i]
       
-      
-      
+      if (last.arrivals[0] + last.ts > time/1000 && last.pm < bus.pm) {
+        //console.log([last, next])
+      interpolate = d3.scale.linear().domain([last.pm, nextpm]).range([last.arrivals[0] + last.ts, next.arrivals[1] + next.ts])
+      bus.next = interpolate(bus.pm)
+      } else {
+        last.arrivals.shift()
+        //console.log([last, next])
+      }
+
+
     } catch (err) {}
   })
 }
 
 pre.predictions = function(){
+  var time = new Date().getTime()
   pre.events = []
   pre.buses.forEach(function(d){
       if (d.next == undefined) {console.log(d)}
-      pre.events.push({"pm":d.pm,"time":d.next})
-      pre.events.push({"pm":d.pm,"time":d.ts/1000})
+      pre.events.push({"pm":d.pm,"time":d.next, "type" : "bus"})
+      pre.events.push({"pm":d.pm,"time":d.ts/1000, "type" : "bus"})
   })
 
   pre.stops.forEach(function(stop,index,array){
@@ -149,13 +156,20 @@ pre.predictions = function(){
       if (!test) { stop.arrivals.shift() } 
     } 
     if (stop.arrivals[0] + stop.ts != undefined) {
-      pre.events.push({"pm":stop.pm, "time": stop.arrivals[0] + stop.ts})
-    }    
+      pre.events.push({"pm":stop.pm, "time": stop.arrivals[0] + stop.ts, "type" : "stop"})
+    } else {console.log("wtf")}  
   })
 
   pre.events.sort(function(a,b){
     if (a.pm == b.pm) { return b.time - a.time} else {
     return a.pm - b.pm}
+  })
+
+  pre.events.forEach(function(d,i,a){
+    var n = i+1
+    if (n == a.length) { n = 0}
+    if (d > a[n] && a[n].type != "bus" && d.type != "bus") {console.log("WTF")}
+
   })
 
   pre.predict = d3.scale.linear().domain(pre.events.map(function(e){return e.pm})).range(pre.events.map(function(e){return e.time}))
