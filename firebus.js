@@ -134,15 +134,10 @@ function relocate(svg, array) {
 
 function setCatchmentAreas(stop_id,center){
 
-  // Try to erase existing catchment ares
-  catch1.setMap(null)
-  catch2.setMap(null)
-  
-
-    try{
+  try{
           arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
-          r1 = 1000*(arrivals[0]/3600)*walkingSpeed
-          r2 = 1000*(arrivals[1]/3600)*walkingSpeed
+          r1 = 15 + 1000*(arrivals[0]/3600)*walkingSpeed
+          r2 = 15 + 1000*(arrivals[1]/3600)*walkingSpeed
           catch1.setRadius(r1)
           catch2.setRadius(r2)
           // Draw two concentric circles using google map API
