@@ -10,17 +10,10 @@ var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
 var lastUpdate
 var r1 = null
-var r2 = null
 var center
 var catch1 = new google.maps.Circle()
-var catch2 = new google.maps.Circle()
 var catch1Options = {fillColor:'gray',
                       fillOpacity:0.5,
-                      strokeColor:"black",
-                      strokeOpacity:1,
-                      strokeWeight:2}
-var catch2Options = {fillColor:'gray',
-                      fillOpacity:0.25,
                       strokeColor:"black",
                       strokeOpacity:1,
                       strokeWeight:2}
@@ -124,7 +117,6 @@ function locateBuses(){
 
 function eraseCatchmentAreas(){
   catch1.setMap(null)
-  catch2.setMap(null)
 }
 
 function setCatchmentAreas(){
@@ -134,17 +126,10 @@ function setCatchmentAreas(){
           var arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
           var ts = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].ts
           r1 = Math.max(10,1000*((arrivals[0] + ts - now)/3600)*walkingSpeed)
-          r2 = Math.max(10,1000*((arrivals[1] + ts - now)/3600)*walkingSpeed)
           catch1.setRadius(r1)
-          catch2.setRadius(r2)
-          // Draw two concentric circles using google map API
           catch1.setOptions(catch1Options)
           catch1.setCenter(center)
           catch1.setMap(map)
-
-          catch2.setOptions(catch2Options)
-          catch2.setCenter(center)
-          catch2.setMap(map)
         } catch (err) {
           console.log('index not found')
         }  
@@ -224,7 +209,7 @@ function pmTOlonlat(pm, shape){
 
 function paintRoute(shape){
   // I need to check if is the correct shape
-      var extBorder = 10
+      var extBorder = 6
       var projectedCoordinates = shape.geometry.coordinates.map(function(d){return overlay.projection(d)}) 
       d3.selectAll(".links").remove()
       shape.geometry.coordinates.forEach(function(d,i,a){
@@ -327,7 +312,7 @@ function paintLink(canvas){
     if (!isNaN(c1)){lingrad.addColorStop(0, color(c1))} else {lingrad.addColorStop(0, "black")}
     if (!isNaN(c2)){lingrad.addColorStop(1, color(c2)); } else {lingrad.addColorStop(0, "black")}
 
-    ctx.lineWidth = 8
+    ctx.lineWidth = 5
     ctx.lineCap = "round"
     ctx.lineJoin = "round"
     ctx.strokeStyle = lingrad;
