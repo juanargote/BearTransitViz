@@ -265,22 +265,30 @@ function paintRoute(shape){
 }
 
 function paintLink(canvas){
+  // var BUSES = pre.buses.map(function(bus){
+  //   var b = bus.pm
+  //   if (b < pre.stops[0] ) {b = b - pre.links.slice(-1)[0]}
+  //     return b
+  // })
+
   if (canvas.node().getContext) {
     var projectedLink = canvas.datum()
     var ctx = canvas.node().getContext("2d");
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);
     var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
-    projectedLink.forEach(function(d){
-      if (d[2] < pre.stops[0].pm){
-        d[2] = d[2] + pre.links.slice(-1)[0]
-      }
-    })
-
-    pre.buses.forEach(function(bus){
+    // projectedLink.forEach(function(d){
+    //   if (d[2] < pre.stops[0].pm){
+    //     d[2] = d[2] + pre.links.slice(-1)[0]
+    //   }
+    // })
+    // projectedLink.forEach(function(d){
+    //   if (pre.stops[0].pm <= d[2] && d[2] <= pre.links.slice(-1)[0]+pre.stops[0].pm){} else {console.log("WFT")}
+    // })
+    pre.events.filter(function(d){return d.type == "bus"}).forEach(function(bus){
       if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
         var loc = (bus.pm - projectedLink[0][2])/linkLength
-        if (0 <= 0 && loc <= 1) {
+        if (0 <= loc && loc <= 1) {
           var c1 = predictions(bus.pm - 0.001)
           if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
           var c2 = predictions(bus.pm + 0.001)
@@ -290,6 +298,35 @@ function paintLink(canvas){
         }
       }
     })
+    // pre.buses.forEach(function(bus){
+    //   if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
+    //     if (pre.stops[0].pm <= bus.pm && bus.pm <= pre.links.slice(-1)[0]+pre.stops[0].pm){ console.log(bus.pm)} else {console.log("WFT")}
+    //     var loc = (bus.pm - projectedLink[0][2])/linkLength
+    //     if (0 <= loc && loc <= 1) {
+    //       var c1 = predictions(bus.pm - 0.001)
+    //       if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
+    //       var c2 = predictions(bus.pm + 0.001)
+    //       if (!isNaN(c2)){lingrad.addColorStop(loc, color(c2))}
+    //     } else {
+    //       console.log(bus)
+    //     }
+    //   }
+    // })
+    
+    // BUSES.forEach(function(bus){
+    //   if (projectedLink[0][2] <= bus && bus <= projectedLink[1][2]) {
+    //     if (pre.links.slice(-1)[0]<= bus && bus <= pre.stops[0].pm + pre.links.slice(-1)[0]){ console.log(bus, pre.events, pre.buses)} else {}
+    //     var loc = (bus - projectedLink[0][2])/linkLength
+    //     if (0 <= loc && loc <= 1) {
+    //       var c1 = predictions(bus - 0.001)
+    //       if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
+    //       var c2 = predictions(bus + 0.001)
+    //       if (!isNaN(c2)){lingrad.addColorStop(loc, color(c2))}
+    //     } else {
+    //       console.log(bus)
+    //     }
+    //   }
+    // })
 
     var c1 = (predictions(projectedLink[0][2]))
     var c2 = (predictions(projectedLink[1][2]))
