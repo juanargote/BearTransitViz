@@ -36,20 +36,39 @@
   stroke-width:3;
 }
 
-#stopMenu {
+#iwindow {
   position: fixed;
-  top:30px;
+  top:-10%;
   left: 35%;
   width: 30%;
-  height: 400px;
-}
-
-.center {
+  height: 270px;
+  text-align: center; 
   display: block;
   margin: auto;
 }
 
-.textC {
-  text-align: center;
-vertical-align: middle;
+#iwindow svg {
 }
+
+#isubdiv {
+  position: relative;
+  width: 100%;
+  top: 100px;
+  left: 0%;
+  height: 100%;
+  background-color: white;
+  z-index: -1;
+  border-radius: 20px;
+  border-style: solid;
+  border-color: Gainsboro;
+  text-align: center;
+  font-family:Helvetica;
+}
+
+
+#iwindow svg circle {
+  fill: MidnightBlue;
+  stroke: Gainsboro;
+}
+
+
