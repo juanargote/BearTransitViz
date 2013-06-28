@@ -1,6 +1,6 @@
 
 var shape
-var color = d3.scale.linear().range(["navy", "gold"]).domain([0, 1.5*60])
+var color = d3.scale.linear().range(["gold", "navy"]).domain([0, 1.5*60])
 var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
@@ -8,6 +8,9 @@ var stopBisect = d3.scale.linear()
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
+var lastUpdate
+var r1 = null
+var r2 = null
 var center
 var catch1 = new google.maps.Circle()
 var catch2 = new google.maps.Circle()
@@ -85,16 +88,12 @@ function initializeFirebase() {
         d3.select("#" + s.name()).each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape))})
         d3.select("#" + s.name()).selectAll("circle").style("fill","gold").style("stroke-width", 5).style("stroke", "navy")
         d3.select("#" + s.name()).selectAll("circle").transition().duration(10000).style("stroke", "white")
-        d3.timer(function(){
-          if (shape != undefined){
-            //predictArrivals()
-            // Dynamically adjust the size of the catchment areas if necessary
-            if (catchmentStopId != null) {
-              setCatchmentAreas(catchmentStopId,center)
-            }
-            return true
-          }
-        })
+        // d3.timer(function(){
+        //   if (shape != undefined){
+        //     predictArrivals()
+        //       return true
+        //   }
+        // })
       });
 
       f.on("child_removed", function(s) {
@@ -135,12 +134,19 @@ function relocate(svg, array) {
     .style("top",(xy[1] - d3.select(svg).style("height").slice(0,-2)/2) + "px")
 }
 
-function setCatchmentAreas(stop_id,center){
+function eraseCatchmentAreas(){
+  catch1.setMap(null)
+  catch2.setMap(null)
+}
 
-  try{
-          arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
-          r1 = 15 + 1000*(arrivals[0]/3600)*walkingSpeed
-          r2 = 15 + 1000*(arrivals[1]/3600)*walkingSpeed
+function setCatchmentAreas(){
+
+  try{    
+          var now = new Date().getTime()/1000
+          var arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
+          var ts = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].ts
+          r1 = Math.max(10,1000*((arrivals[0] + ts - now)/3600)*walkingSpeed)
+          r2 = Math.max(10,1000*((arrivals[1] + ts - now)/3600)*walkingSpeed)
           catch1.setRadius(r1)
           catch2.setRadius(r2)
           // Draw two concentric circles using google map API
@@ -170,11 +176,10 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
       console.log(d)
       if (catchmentStopId == null || catchmentStopId != d.properties.stop_id){
         catchmentStopId = d.properties.stop_id
-        setCatchmentAreas(d.properties.stop_id,center)
+        setCatchmentAreas()
       } else {
         catchmentStopId = null
-        catch1.setMap(null)
-        catch2.setMap(null)
+        eraseCatchmentAreas()
       }
       
     })
