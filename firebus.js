@@ -74,34 +74,12 @@ function initializeFirebase() {
       });
       
       f.on("child_changed", function(s) {
-    
-        buses[s.name()] = s.val()
-        //processPrediction()
-        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
-        
-        d3buses.enter().append("svg") // in case there was a new bus
-          .attr("class","buses")
-          .attr("id", function(d){return d.key})
 
-        d3buses.exit().remove() // should never happen but in case one bus disapers this removes it
-
-        d3.select("#" + s.name()).each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape))})
-        d3.select("#" + s.name()).selectAll("circle").style("fill","gold").style("stroke-width", 5).style("stroke", "navy")
-        d3.select("#" + s.name()).selectAll("circle").transition().duration(10000).style("stroke", "white")
-        // d3.timer(function(){
-        //   if (shape != undefined){
-        //     predictArrivals()
-        //       return true
-        //   }
-        // })
       });
 
       f.on("child_removed", function(s) {
-        
-        //delete buses[s.name()];
         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         d3buses.exit().remove()
-        //processPrediction()
       });
 
       fStops.once("value",function(s){
@@ -132,6 +110,16 @@ function relocate(svg, array) {
   d3.select(svg)
     .style("left",(xy[0] - d3.select(svg).style("width").slice(0,-2)/2) + "px")
     .style("top",(xy[1] - d3.select(svg).style("height").slice(0,-2)/2) + "px")
+}
+
+function locateBuses(){
+  pre.buses.forEach(function(s){
+    try{
+      d3.select("#" + s.id).each(function(d){ relocate(this, pmTOlonlat(s.pm, shape))})
+    } catch (error) {
+      console.log(error)
+    }
+  })
 }
 
 function eraseCatchmentAreas(){
