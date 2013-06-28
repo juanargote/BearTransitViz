@@ -271,6 +271,12 @@ function paintLink(canvas){
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);
     var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
+    projectedLink.forEach(function(d){
+      if (d[2] < pre.stops[0].pm){
+        d[2] = d[2] + pre.links.slice(-1)[0]
+      }
+    })
+
     pre.buses.forEach(function(bus){
       if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
         var loc = (bus.pm - projectedLink[0][2])/linkLength

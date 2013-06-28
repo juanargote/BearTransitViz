@@ -26,6 +26,8 @@
     predictions.range([30,40])
     
     predictions = function(pm){
+     if (pm < pre.stops[0].pm) {pm = pm + pre.links.slice(-1)[0]} 
+
      var time = new Date().getTime()/1000
 
       return pre.predict(pm) - time 

@@ -1,4 +1,3 @@
-
 var pre = {
   "busData": {}
 }
@@ -26,7 +25,6 @@ fbuses.on("child_changed", function(s) {
   busesPRE[s.name()] = s.val()
   pre.buses.forEach(function(bus){
     if (bus.id == s.name()) {
-      bus.arrivals = s.val().arrivals
       bus.ts = s.val().ts
       bus.pm = s.val().pm
     }
@@ -45,15 +43,16 @@ fstops.on("child_changed", function(s) {
 pre.lastStop = function(pm){ //postmile of the bus
       var STOPS = pre.stops.sort(function(a,b){return a.pm - b.pm})
       var i
-      if (pm < STOPS[0].pm) {
-        return STOPS.length - 1
-      }
+      
       for (i = 0; i < STOPS.length; i++) {
         if (STOPS[i].pm > pm) {
           return i-1
         }
       }
-      return i-1 // returns index of the last stop NOT ID
+      if (pre.links.slice(-1)[0] < pm && pm < STOPS[0].pm + pre.links.slice(-1)[0]) {
+        return STOPS.length - 1
+      }
+      return STOPS.length - 1 // returns index of the last stop NOT ID
     }
 
 pre.nextStop = function(index){ // index of the last stop
@@ -71,6 +70,30 @@ pre.prevStop = function(index){ // index of the last stop
 }
 
 pre.process = function(){
+  pre.stops = pre.stops.filter(function(d){return d.id!="loop"})
+  //pre.stops.push({"id":"loop", "pm": pre.links.slice(-1)[0]+ pre.stops[0].pm, "ts":pre.stops[0].ts, "arrivals": pre.stops[0].arrivals.map(function(d){return d}) })
+  // pre.buses = pre.buses.filter(function(d){return d.id!="loop"})
+  // pre.buses.forEach(function(bus){
+  //  pre.buses.push({
+  //   "id":"loop",
+  //   "pm": bus.pm 
+  //  }) 
+  // })
+  //pre.stops.push({"id":"loop", "pm": pre.links.slice(-1)[0]+ pre.stops[0].pm, "ts":pre.stops[0].ts, "arrivals": pre.stops[0].arrivals.map(function(d){return d}) })
+  pre.buses = pre.buses.map(function(bus){
+    if (bus.pm < pre.stops[0].pm) {
+      console.log("why????")
+      bus.pm = bus.pm + pre.links.slice(-1)[0]
+    }
+    return bus
+  })
+  pre.buses.forEach(function(bus){
+    if (bus.pm < pre.stops[0].pm) { 
+        bus.pm = bus.pm + pre.links.slice(-1)[0]
+      } 
+  })
+
+
   var time = new Date().getTime()
   pre.buses.forEach(function(bus){
 
@@ -114,9 +137,13 @@ pre.process = function(){
       bus.next = time/1000 + 120
       if (bus.pm == undefined) {console.log("WTF")}
       bus.pm = bus.pm + (time -bus.ts)/1000 * bus.speed
-      
+      if (bus.pm > pre.links.slice(-1)[0] + pre.stops[0].pm) { 
+        bus.pm = bus.pm - pre.links.slice(-1)[0]
+      } 
+
+
       //console.log(pre.links)
-      if (bus.pm > pre.links.slice(-1)[0]){ bus.pm = bus.pm - pre.links.slice(-1)[0]}
+      //if (bus.pm > pre.links.slice(-1)[0]){ bus.pm = bus.pm - pre.links.slice(-1)[0]}
       bus.ts = time
       i = pre.lastStop(bus.pm)
       bus.last = pre.stops[i]
@@ -136,9 +163,19 @@ pre.process = function(){
 }
 
 pre.predictions = function(){
+  pre.buses = pre.buses.map(function(bus){
+    if (bus.pm < pre.stops[0].pm) {
+      console.log("why????")
+      bus.pm = bus.pm + pre.links.slice(-1)[0]
+    }
+    return bus
+  })
+
   var time = new Date().getTime()
   pre.events = []
   pre.buses.forEach(function(d){
+      if (d.pm < pre.stops[0].pm){console.log("error")}
+      if (isNaN(d.pm) || isNaN(d.next) || isNaN(d.ts) ) { console.log(d)}
       if (d.next == undefined) {console.log(d)}
       pre.events.push({"pm":d.pm,"time":d.next, "type" : "bus"})
       pre.events.push({"pm":d.pm,"time":d.ts/1000, "type" : "bus"})
@@ -155,9 +192,15 @@ pre.predictions = function(){
       })
       if (!test) { stop.arrivals.shift() } 
     } 
-    if (stop.arrivals[0] + stop.ts != undefined) {
+    if (!isNaN(stop.arrivals[0] + stop.ts)) {
       pre.events.push({"pm":stop.pm, "time": stop.arrivals[0] + stop.ts, "type" : "stop"})
-    } else {console.log("wtf")}  
+    } else {console.log(stop)}  
+  })
+
+  pre.events.push({
+    "pm": pre.stops[0].pm + pre.links.slice(-1)[0],
+    "time": pre.stops[0].arrivals[0] + pre.stops[0].ts,
+    "type":"stop"
   })
 
   pre.events.sort(function(a,b){
@@ -165,12 +208,27 @@ pre.predictions = function(){
     return a.pm - b.pm}
   })
 
+  // var events = pre.events.filter(function(event){return event.pm >= pre.links.slice(-1)[0]}).map(function(e){
+  //   var pm = e.pm - pre.links.slice(-1)[0]; 
+  //   var time = e.time
+  //   var type = e.type
+  //   return {"pm":pm, "time":time, "type": type}
+  // })
+  // pre.events = events.concat(pre.events)
+  //console.log(d3.min(pre.events.map(function(d){return d.pm})))
   pre.events.forEach(function(d,i,a){
     var n = i+1
     if (n == a.length) { n = 0}
     if (d > a[n] && a[n].type != "bus" && d.type != "bus") {console.log("WTF")}
 
   })
+  
+  
+  pre.events.forEach(function(d){
+    if (isNaN(d.pm) || isNaN(d.time) ) { console.log(d)}
+  })
+
+  
 
   pre.predict = d3.scale.linear().domain(pre.events.map(function(e){return e.pm})).range(pre.events.map(function(e){return e.time}))
 }
