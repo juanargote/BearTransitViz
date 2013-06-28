@@ -10,7 +10,7 @@ var inter = {
 inter.window = d3.select("body").append("div").attr("id", "iwindow")
 	.on("click", function(){
 		if (inter.window.style("opacity") == 0){
-			inter.show()
+			// inter.show()
 		} else {
 			inter.hide()
 		}
@@ -40,9 +40,9 @@ inter.first = inter.subdiv.append("h2").text("1 min")
 inter.second = inter.subdiv.append("h2").text("1 min")
 
 inter.hide = function(){
-	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) + 200) + "px").style("opacity",0)
+	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) + 200) + "px").style("opacity",0).style("z-index",-2)
 }
 
 inter.show = function(){
-	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) - 200) + "px").style("opacity",1)
+	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) - 200) + "px").style("opacity",1).style("z-index",1)
 }
