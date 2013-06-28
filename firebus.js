@@ -30,9 +30,11 @@ function initializeFirebase() {
 
       f.once("value", function(s) { // downloads the list of buses, updates the list of buses, creates an svg for each bus (calls the add circle) and deletes any bus svg that already exists
 
+
         buses = s.val()
         console.log(s.val())
-        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
+        console.log(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
+        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
         
         d3buses.enter().append("svg")
           .attr("class","buses")
@@ -48,6 +50,7 @@ function initializeFirebase() {
             //   .range(shape.geometry.coordinates.map(function(d,i){return i}))
             //paintRoute(shape)
 
+            console.log(d3buses)
             d3buses.each(addBus)
               .each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) //[d.value.lon, d.value.lat]
 
@@ -80,7 +83,7 @@ function initializeFirebase() {
         d3buses.exit().remove() // should never happen but in case one bus disapers this removes it
 
         d3.select("#" + s.name()).each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape))})
-        d3.select("#" + s.name()).selectAll("circle").style("stroke", "gold")
+        d3.select("#" + s.name()).selectAll("circle").style("fill","gold").style("stroke-width", 5).style("stroke", "navy")
         d3.select("#" + s.name()).selectAll("circle").transition().duration(10000).style("stroke", "white")
         d3.timer(function(){
           if (shape != undefined){
