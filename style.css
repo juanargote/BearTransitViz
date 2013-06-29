@@ -48,6 +48,9 @@
 }
 
 #iwindow svg {
+  pointer-events: fill;
+  
+  top: 50px;
 }
 
 #isubdiv {
@@ -72,4 +75,24 @@
   stroke: Gainsboro;
 }
 
+.leyend {
+   position: fixed;
+   right: 0.5cm;
+   bottom: 1cm;
+   width: 1cm;
+   height: 5cm; 
+   opacity: 0.8;
+}
 
+.leyend svg {
+  pointer-events: none;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: grey;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-family:Helvetica;
+}

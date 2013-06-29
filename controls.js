@@ -8,6 +8,10 @@ var inter = {
 
 
 inter.window = d3.select("body").append("div").attr("id", "iwindow")
+	
+
+inter.subdiv = inter.window.append("div")
+	.attr("id","isubdiv")
 	.on("click", function(){
 		if (inter.window.style("opacity") == 0){
 			// inter.show()
@@ -15,13 +19,17 @@ inter.window = d3.select("body").append("div").attr("id", "iwindow")
 			inter.hide()
 		}
 	})
-	.on("mouseover",function(){ inter.window.style("cursor","pointer")})
-
-inter.subdiv = inter.window.append("div")
-	.attr("id","isubdiv")
-	
+	.on("mouseover",function(){ inter.subdiv.style("cursor","pointer")})
 
 inter.svg = inter.window.append("svg").attr("width", 200).attr("height", 200)
+.on("click", function(){
+		if (inter.window.style("opacity") == 0){
+			// inter.show()
+		} else {
+			inter.hide()
+		}
+	})
+	.on("mouseover",function(){ inter.svg.style("cursor","pointer")})
 
 inter.g1 = inter.svg.append("g").attr("transform", "translate(100,100)scale(2)")
 inter.g2 = inter.svg.append("g").attr("transform", "translate(100,100)scale(2)rotate(0)")
@@ -46,3 +54,49 @@ inter.hide = function(){
 inter.show = function(){
 	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) - 200) + "px").style("opacity",1).style("z-index",1)
 }
+
+var leyend = {}
+
+leyend.append = function(){
+leyend.window = d3.select("body").append("div").attr("class","leyend")
+
+leyend.svg = leyend.window.append("svg").attr("width","100%").attr("height","100%")
+
+leyend.width = +leyend.window.style("width").slice(0,-2)
+leyend.height = +leyend.window.style("height").slice(0,-2)
+
+leyend.svg.append("rect").attr("transform","translate(0,"+(leyend.height*0.05)+")").attr("width","30%").attr("height","90%")
+
+var gradient = leyend.svg.append("svg:defs")
+  .append("svg:linearGradient")
+    .attr("id", "gradient")
+    .attr("x1", "0%")
+    .attr("y1", "90%")
+    .attr("x2", "0%")
+    .attr("y2", "10%")
+
+color.domain().forEach(function(d,i){
+var ext = d3.extent(color.domain())
+var col = color.range()[i]
+
+gradient.append("svg:stop")
+    .attr("offset", function(){return ((d - ext[0])/(ext[1]-ext[0])*100) + "%" })
+    .attr("stop-color", col)
+    .attr("stop-opacity", 1);
+
+})
+colorscale = d3.scale.linear().domain(color.domain()).range([leyend.height,0])
+
+coloraxis = d3.svg.axis()
+	    .scale(colorscale)
+	    .orient("right");
+
+leyend.svg.append("g").attr("transform","translate("+(leyend.width*0.3)+","+(leyend.height*0.05)+")scale(0.9)")
+	.attr("class", "axis")
+		.call(coloraxis)
+
+leyend.svg.select("rect").attr("fill","url(#gradient)")
+}
+
+leyend.append()
+

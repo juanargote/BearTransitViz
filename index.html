@@ -33,23 +33,23 @@
       return pre.predict(pm) - time 
     }
 
-    setInterval(function(e){
-      //console.log(e)
-      if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){
-        // Advance the animation based on the latest data from firebase and the time elapsed
-        pre.process()
-        pre.predictions()
-        // Draw the route
-        paintRoute(shape)
-        // Relocate the buses
-        locateBuses()
-        // Draw the new catchment areas
-        if (catchmentStopId != null){
-          setCatchmentAreas()
-        }
-      }
-      return s
-    },100)
+    // setInterval(function(e){
+    //   //console.log(e)
+    //   if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){
+    //     // Advance the animation based on the latest data from firebase and the time elapsed
+    //     pre.process()
+    //     pre.predictions()
+    //     // Draw the route
+    //     paintRoute(shape)
+    //     // Relocate the buses
+    //     locateBuses()
+    //     // Draw the new catchment areas
+    //     if (catchmentStopId != null){
+    //       setCatchmentAreas()
+    //     }
+    //   }
+    //   return s
+    // },100)
 
     </script>
   </body>
