@@ -6,8 +6,10 @@ var buses = {}
 var stops = {}
 var stopBisect = d3.scale.linear()
 var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 4, 10])
-var getStopRadius = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([1,7.5,15])
-var getStopBorder = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([0.2, 3,5])
+var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
+var getStopBorder = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,3,5])
+var getBusRadius = d3.scale.pow().exponent(2).domain([0,13, 14, 20]).range([0,5,9.5,17])
+var getBusBorder = d3.scale.pow().exponent(2).domain([0,13, 14, 20]).range([0,1,3,5])
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
@@ -34,13 +36,13 @@ function initializeFirebase() {
         buses = s.val()
         console.log(s.val())
         console.log(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
-        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
+        // var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
         
-        d3buses.enter().append("svg")
-          .attr("class","buses")
-          .attr("id", function(d){return d.key})
+        // d3buses.enter().append("svg")
+        //   .attr("class","buses")
+        //   .attr("id", function(d){return d.key})
           
-        d3buses.exit().remove()
+        // d3buses.exit().remove()
 
         d3.json("P.json",function(data){
           pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
@@ -49,40 +51,14 @@ function initializeFirebase() {
             // predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
             //   .range(shape.geometry.coordinates.map(function(d,i){return i}))
             //paintRoute(shape)
-
-            console.log(d3buses)
-            d3buses.each(addBus)
-              .each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) //[d.value.lon, d.value.lat]
           })
         })
       });
       
-      f.on("child_changed", function(s) {
-
-      });
-
       f.on("child_removed", function(s) {
         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
         d3buses.exit().remove()
       });
-
-      fStops.once("value",function(s){
-        stops = s.val()
-        console.log(stops)
-        
-      var coordinates = d3.entries(stops).map(function(d){ return d.value.pm})
-        console.log(coordinates)
-        
-        // for (var stop in stops) {
-        //   stop.arrivals = [1,10,30]
-        // } 
-        
-      })
-
-      fStops.on("child_changed", function(s){
-        stops[s.name()] = s.val()
-        //console.log(stops)
-      })
 
       return true
     }
@@ -90,10 +66,9 @@ function initializeFirebase() {
 }
 
 function resizeStops(){
-  console.log('in resizeStops, zoom ' + map.getZoom() + ', radius ' + getStopRadius(map.getZoom()))
+  var radius = getStopRadius(map.getZoom())
+  var border = getStopBorder(map.getZoom())
   d3.select("#OverlaySvg").selectAll(".stops").each(function(d){
-    var radius = getStopRadius(map.getZoom())
-    var border = getStopBorder(map.getZoom())
     var d3Stop = d3.select(this)
 
     // Resize the svg container
@@ -104,7 +79,24 @@ function resizeStops(){
     d3Stop.select("circle").datum(d).attr("r", radius)
       .attr("cx",(radius+border))
       .attr("cy",(radius+border))
-      console.log(d.pm)
+    relocate(this, pmTOlonlat(d.pm, shape))
+  })
+}
+
+function resizeBuses(){
+  var radius = 2 + getBusRadius(map.getZoom())
+  var border = getBusBorder(map.getZoom())
+  d3.select("#OverlaySvg").selectAll(".buses").each(function(d){
+    var d3Bus = d3.select(this)
+
+    // Resize the svg container
+    d3Bus.style("width",(2*(radius + border)) + "px")
+      .style("height",(2*(radius + border)) + "px")
+
+    // Resize the circle
+    d3Bus.select("circle").datum(d).attr("r", radius)
+      .attr("cx",(radius+border))
+      .attr("cy",(radius+border))
     relocate(this, pmTOlonlat(d.pm, shape))
   })
 }
@@ -134,6 +126,16 @@ function initializeStops(){
             .attr("id",function(d,i){return "STOP"+d.id})
             .each(addStop)
             .each(function(d){ relocate(this, pmTOlonlat(d.pm, shape))})
+}
+
+function initializeBuses(){
+
+  d3.select("#OverlaySvg").selectAll(".buses").data(pre.buses.filter(function(b,i,a) {return b.pm != undefined}))
+    .enter().append("svg")
+    .attr("class","buses")
+    .attr("id", function(b){return b.id})
+    .each(function(d){console.log(d)})
+    .each(addBus)
 }
 
 
@@ -202,15 +204,13 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
 }
 
 function addBus(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
-  var radius = 10
-  var border = 5
+  var radius = 2 + getStopRadius(map.getZoom())
+  var border = getStopBorder(map.getZoom())
   var d3buses = d3.select(this)
 
   d3buses.append("circle").attr("r", radius)
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
-    
-  var xy = overlay.projection([d.value.lon, d.value.lat])
 
   d3.select(this)
     .style("width",(2*(radius + border)) + "px")

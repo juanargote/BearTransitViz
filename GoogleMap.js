@@ -23,10 +23,8 @@ function initializeOverlay() {
 	        	return [pixelCoordinates.x, pixelCoordinates.y].concat(coordinates.slice(2));
 	      	}
 	      	reprojectOverlays()
-	      		 
-	      	
+	      		  	
 		}
-
 	}	
 	overlay.setMap(map)
 }
@@ -48,9 +46,8 @@ function initializeMap() {
 }
 
 function reprojectOverlays(){
-	console.log('reprojection')
-	d3.selectAll(".buses").each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) // this function is defined in firebus.js
-	d3.selectAll(".stops").each(function(d){ relocate(this, pmTOlonlat(d.pm, shape)) }) // this function is defined in firebus.js
+	console.log(map.getZoom())
+	resizeBuses()
 	resizeStops() //this function is defined in firebus.js
 	d3.selectAll(".catchment").each(function(d){ relocate(this, d.geometry.coordinates)})
 	if (shape != undefined) {paintRoute(shape)} // this function is defined in firebus.js

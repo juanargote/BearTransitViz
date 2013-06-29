@@ -37,9 +37,14 @@
       if (pre.stops != undefined){
         initializeStops()
         return true
-      } else {
-        console.log('pre.stops not defined yet')
-      }
+      } 
+    })
+
+    d3.timer(function(){
+      if (pre.buses != undefined){
+        initializeBuses()
+        return true
+      } 
     })
 
     setInterval(function(e){
