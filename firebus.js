@@ -172,6 +172,7 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
       var coordinates = pmTOlonlat(d.pm, shape)
       center = new google.maps.LatLng(coordinates[1], coordinates[0])
       map.panTo(center)
+      map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/4)
       console.log(d)
       if (catchmentStopId == null || catchmentStopId != d.id){
         catchmentStopId = d.id
