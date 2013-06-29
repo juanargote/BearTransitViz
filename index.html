@@ -33,6 +33,15 @@
       return pre.predict(pm) - time 
     }
 
+    d3.timer(function(){
+      if (pre.stops != undefined){
+        initializeStops()
+        return true
+      } else {
+        console.log('pre.stops not defined yet')
+      }
+    })
+
     setInterval(function(e){
       //console.log(e)
       if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){

@@ -5,11 +5,15 @@ var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
 var stopBisect = d3.scale.linear()
+var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 4, 10])
+var getStopRadius = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([1,7.5,15])
+var getStopBorder = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([0.2, 3,5])
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
 var lastUpdate
 var r1 = null
+var timeLeft = null
 var center
 var catch1 = new google.maps.Circle()
 var catch1Options = {fillColor:'gray',
@@ -49,20 +53,7 @@ function initializeFirebase() {
             console.log(d3buses)
             d3buses.each(addBus)
               .each(function(d){ relocate(this, pmTOlonlat(d.value.pm, shape) )}) //[d.value.lon, d.value.lat]
-
-            
           })
-        })
-        d3.json("P_Stops.json", function(data){ // eventually this data will come from the firebase
-
-
-        d3.select("#OverlaySvg").selectAll(".stops").data(data.features).enter()
-          .append("svg")
-          .attr("class","stops")
-          .attr("id",function(d,i){return "STOP"+i})
-          .each(addStop)
-          .each(function(d){ relocate(this, d.geometry.coordinates)})
-          .on("click",selectStop)
         })
       });
       
@@ -98,6 +89,26 @@ function initializeFirebase() {
   })  
 }
 
+function resizeStops(){
+  console.log('in resizeStops, zoom ' + map.getZoom() + ', radius ' + getStopRadius(map.getZoom()))
+  d3.select("#OverlaySvg").selectAll(".stops").each(function(d){
+    var radius = getStopRadius(map.getZoom())
+    var border = getStopBorder(map.getZoom())
+    var d3Stop = d3.select(this)
+
+    // Resize the svg container
+    d3Stop.style("width",(2*(radius + border)) + "px")
+      .style("height",(2*(radius + border)) + "px")
+
+    // Resize the circle
+    d3Stop.select("circle").datum(d).attr("r", radius)
+      .attr("cx",(radius+border))
+      .attr("cy",(radius+border))
+      console.log(d.pm)
+    relocate(this, pmTOlonlat(d.pm, shape))
+  })
+}
+
 function relocate(svg, array) {
   var xy = overlay.projection(array)
   d3.select(svg)
@@ -115,6 +126,17 @@ function locateBuses(){
   })
 }
 
+function initializeStops(){
+  
+  d3.select("#OverlaySvg").selectAll(".stops").data(pre.stops).enter()
+            .append("svg")
+            .attr("class","stops")
+            .attr("id",function(d,i){return "STOP"+d.id})
+            .each(addStop)
+            .each(function(d){ relocate(this, pmTOlonlat(d.pm, shape))})
+}
+
+
 function eraseCatchmentAreas(){
   catch1.setMap(null)
 }
@@ -125,6 +147,7 @@ function setCatchmentAreas(){
           var now = new Date().getTime()/1000
           var arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
           var ts = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].ts
+          var timeLeft = (arrivals[0] + ts - now)/60 //in [min]
           r1 = Math.max(10,1000*((arrivals[0] + ts - now)/3600)*walkingSpeed)
           catch1.setRadius(r1)
           catch1.setOptions(catch1Options)
@@ -136,23 +159,31 @@ function setCatchmentAreas(){
 }
 
 function addStop(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
-  var radius = 7.5
-  var border = 4
+  var radius = getStopRadius(map.getZoom())
+  var border = getStopBorder(map.getZoom())
   var d3Stops = d3.select(this)
 
   d3Stops.selectAll("circle").data([d]).enter().append("circle").attr("r", radius)
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
     .on("click", function(d){
-      center = new google.maps.LatLng(d.geometry.coordinates[1], d.geometry.coordinates[0])
+      var coordinates = pmTOlonlat(d.pm, shape)
+      center = new google.maps.LatLng(coordinates[1], coordinates[0])
       map.panTo(center)
       console.log(d)
-      if (catchmentStopId == null || catchmentStopId != d.properties.stop_id){
-        catchmentStopId = d.properties.stop_id
+      if (catchmentStopId == null || catchmentStopId != d.id){
+        catchmentStopId = d.id
         setCatchmentAreas()
+        inter.show()
+        if (timeLeft > 1) {
+          inter.first.text(timeLeft + "min")
+        } else {
+          inter.first.text("Hurry up!!!")
+        }
       } else {
         catchmentStopId = null
         eraseCatchmentAreas()
+        inter.hide()
       }
       
     })
@@ -168,12 +199,6 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
     .style("height",(2*(radius + border)) + "px")
 
   d3Stops.selectAll(".stops circle").style("fill","navy").style("stroke-width", border).style("stroke", "whitesmoke")
-}
-
-function selectStop(d) {
-  var d3Stops = d3.select(this)
-
-  //d3Stops.select("circle").style("fill","green")
 }
 
 function addBus(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
@@ -243,11 +268,6 @@ function paintRoute(shape){
 }
 
 function paintLink(canvas){
-  // var BUSES = pre.buses.map(function(bus){
-  //   var b = bus.pm
-  //   if (b < pre.stops[0] ) {b = b - pre.links.slice(-1)[0]}
-  //     return b
-  // })
 
   if (canvas.node().getContext) {
     var projectedLink = canvas.datum()
@@ -255,14 +275,6 @@ function paintLink(canvas){
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);
     var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
-    // projectedLink.forEach(function(d){
-    //   if (d[2] < pre.stops[0].pm){
-    //     d[2] = d[2] + pre.links.slice(-1)[0]
-    //   }
-    // })
-    // projectedLink.forEach(function(d){
-    //   if (pre.stops[0].pm <= d[2] && d[2] <= pre.links.slice(-1)[0]+pre.stops[0].pm){} else {console.log("WFT")}
-    // })
     pre.events.filter(function(d){return d.type == "bus"}).forEach(function(bus){
       if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
         var loc = (bus.pm - projectedLink[0][2])/linkLength
@@ -276,35 +288,6 @@ function paintLink(canvas){
         }
       }
     })
-    // pre.buses.forEach(function(bus){
-    //   if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
-    //     if (pre.stops[0].pm <= bus.pm && bus.pm <= pre.links.slice(-1)[0]+pre.stops[0].pm){ console.log(bus.pm)} else {console.log("WFT")}
-    //     var loc = (bus.pm - projectedLink[0][2])/linkLength
-    //     if (0 <= loc && loc <= 1) {
-    //       var c1 = predictions(bus.pm - 0.001)
-    //       if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
-    //       var c2 = predictions(bus.pm + 0.001)
-    //       if (!isNaN(c2)){lingrad.addColorStop(loc, color(c2))}
-    //     } else {
-    //       console.log(bus)
-    //     }
-    //   }
-    // })
-    
-    // BUSES.forEach(function(bus){
-    //   if (projectedLink[0][2] <= bus && bus <= projectedLink[1][2]) {
-    //     if (pre.links.slice(-1)[0]<= bus && bus <= pre.stops[0].pm + pre.links.slice(-1)[0]){ console.log(bus, pre.events, pre.buses)} else {}
-    //     var loc = (bus - projectedLink[0][2])/linkLength
-    //     if (0 <= loc && loc <= 1) {
-    //       var c1 = predictions(bus - 0.001)
-    //       if (!isNaN(c1)){lingrad.addColorStop(loc, color(c1))}
-    //       var c2 = predictions(bus + 0.001)
-    //       if (!isNaN(c2)){lingrad.addColorStop(loc, color(c2))}
-    //     } else {
-    //       console.log(bus)
-    //     }
-    //   }
-    // })
 
     var c1 = (predictions(projectedLink[0][2]))
     var c2 = (predictions(projectedLink[1][2]))
@@ -312,7 +295,7 @@ function paintLink(canvas){
     if (!isNaN(c1)){lingrad.addColorStop(0, color(c1))} else {lingrad.addColorStop(0, "black")}
     if (!isNaN(c2)){lingrad.addColorStop(1, color(c2)); } else {lingrad.addColorStop(0, "black")}
 
-    ctx.lineWidth = 5
+    ctx.lineWidth = getLineWidth(map.getZoom())
     ctx.lineCap = "round"
     ctx.lineJoin = "round"
     ctx.strokeStyle = lingrad;
