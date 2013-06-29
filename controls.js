@@ -1,10 +1,21 @@
+d3.json("icons.json", function(data){
+	// loads the lineart for the icons
+})
+
+// the interphase consists of:
+	// the menu that pops up with the information about the selected stop
+	// the legend that shows the colorscale
+
 var inter = {
 	"window":0, //this is the d3 selection of the interphase popup menu (a <div> element)
 	"svg":0,
 	"subdiv":0, // the div where text is going to be displayed
 }
 
-
+// <div> #iwindow
+// 	<svg> #iwindow svg
+//  <div> #iwindo div div
+//   <div>
 
 
 inter.window = d3.select("body").append("div").attr("id", "iwindow")
@@ -48,11 +59,15 @@ inter.first = inter.subdiv.append("h2").text("1 min")
 inter.second = inter.subdiv.append("h2").text("1 min")
 
 inter.hide = function(){
-	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) + 200) + "px").style("opacity",0).style("z-index",-2)
+	if (inter.window.style("opacity") != 0) {
+		inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) + 200) + "px").style("opacity",0).style("z-index",-2)
+	}
 }
 
 inter.show = function(){
-	inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) - 200) + "px").style("opacity",1).style("z-index",1)
+	if (inter.window.style("opacity") == 0) {
+		inter.window.transition().style("top", (+inter.window.style("top").slice(0,-2) - 200) + "px").style("opacity",1).style("z-index",1)
+	}
 }
 
 var leyend = {}
