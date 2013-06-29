@@ -1,6 +1,6 @@
 
 var shape
-var color = d3.scale.linear().range(["gold", "navy"]).domain([0, 1.5*60])
+var color = d3.scale.linear().range(["red", "blue"]).domain([0, 1.5*60])
 var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
