@@ -14,8 +14,8 @@ var inter = {
 
 // <div> #iwindow
 // 	<svg> #iwindow svg
-//  <div> #iwindo div div
-//   <div>
+//  <div> #iwindo div 
+//   <div> #iwindo div div
 
 
 inter.window = d3.select("body").append("div").attr("id", "iwindow")
@@ -53,10 +53,13 @@ inter.g1.append("path").attr("d", "M-8.5,11.5V12h-1h-1h-1v-0.5c0-0.276,0.224-0.5
 inter.g2.append("path").attr("d", "M-14.142-14.142c-7.811,7.811-7.811,20.474,0,28.284C-10.237,18.047,0,28.284,0,28.284s10.237-10.237,14.142-14.142c7.811-7.811,7.811-20.474,0-28.284S-6.332-21.953-14.142-14.142z M12.375,12.375c-6.834,6.834-17.915,6.834-24.749,0c-6.834-6.834-6.834-17.915,0-24.749c6.834-6.834,17.915-6.834,24.749,0C19.208-5.54,19.208,5.54,12.375,12.375z")
 	.style("fill", "grey ")
 
-inter.title = inter.subdiv.style("text-align","center").style("display","block").style("vertical-align","middle").style("background-color","white").append("h1").text("Arrivals")
+
+inter.title = inter.subdiv.style("text-align","center").style("display","block").style("vertical-align","middle").append("h1").text("Arrivals")
 inter.subtitle = inter.subdiv.append("h3").text("stop name")
 inter.first = inter.subdiv.append("h2").text("1 min")
 inter.second = inter.subdiv.append("h2").text("1 min")
+
+d3.select("#isubdiv div").text("hello")
 
 inter.hide = function(){
 	if (inter.window.style("opacity") != 0) {
@@ -70,19 +73,21 @@ inter.show = function(){
 	}
 }
 
-var leyend = {}
+var legend = {}
 
-leyend.append = function(){
-leyend.window = d3.select("body").append("div").attr("class","leyend")
+legend.append = function(){
+legend.window =  d3.select(".legend")//d3.select("body").append("div").attr("class","legend")
 
-leyend.svg = leyend.window.append("svg").attr("width","100%").attr("height","100%")
+legend.svg =  d3.select(".legend svg")//legend.window.append("svg").attr("width","100%").attr("height","100%")
 
-leyend.width = +leyend.window.style("width").slice(0,-2)
-leyend.height = +leyend.window.style("height").slice(0,-2)
+legend.width = +legend.window.style("width").slice(0,-2)
+legend.height = +legend.window.style("height").slice(0,-2)
 
-leyend.svg.append("rect").attr("transform","translate(0,"+(leyend.height*0.05)+")").attr("width","30%").attr("height","90%")
+legend.background = legend.svg.append("rect").attr("width","100%").attr("height","100%").style("fill","whitesmoke").style("stroke","silver")
 
-var gradient = leyend.svg.append("svg:defs")
+legend.rect = legend.svg.append("rect").attr("transform","translate("+(legend.width*0.3)+","+(legend.height*0.05)+")").attr("width","20%").attr("height","90%")
+
+var gradient = legend.svg.append("svg:defs")
   .append("svg:linearGradient")
     .attr("id", "gradient")
     .attr("x1", "0%")
@@ -100,18 +105,27 @@ gradient.append("svg:stop")
     .attr("stop-opacity", 1);
 
 })
-colorscale = d3.scale.linear().domain(color.domain()).range([leyend.height,0])
+colorscale = d3.scale.linear().domain(color.domain().map(function(d){return d/60})).range([legend.height,0])
 
 coloraxis = d3.svg.axis()
 	    .scale(colorscale)
-	    .orient("right");
+	    .orient("right")
+	    .ticks(4);
 
-leyend.svg.append("g").attr("transform","translate("+(leyend.width*0.3)+","+(leyend.height*0.05)+")scale(0.9)")
+legend.svg.append("g").attr("transform","translate("+(legend.width*0.5)+","+(legend.height*0.05)+")scale(0.9)")
 	.attr("class", "axis")
-		.call(coloraxis)
+	.call(coloraxis)
+	.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", -legend.width*0.2)
+		.attr("x", -legend.height/2)
+		.attr("dy", "-.50em")
+		.attr("font-size", "100%")
+		.style("text-anchor", "middle")
+		.text("Time until the next arrival (min)")
 
-leyend.svg.select("rect").attr("fill","url(#gradient)")
+legend.rect.attr("fill","url(#gradient)")
 }
 
-leyend.append()
+legend.append()
 

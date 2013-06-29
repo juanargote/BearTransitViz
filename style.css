@@ -37,8 +37,9 @@
 }
 
 #iwindow {
+  pointer-events: none;
   position: fixed;
-  top:-10%;
+  top:0%;
   left: 35%;
   width: 30%;
   height: 270px;
@@ -48,44 +49,57 @@
 }
 
 #iwindow svg {
-  pointer-events: fill;
+  pointer-events: visible;
   
   top: 50px;
 }
 
 #isubdiv {
-  opacity: 0.7;
-  position: relative;
+  position: absolute;
+  pointer-events: visible;
   width: 100%;
   top: 100px;
   left: 0%;
   height: 100%;
-  background-color: white;
   z-index: -1;
-  border-radius: 20px;
-  border-style: solid;
-  border-color: Gainsboro;
   text-align: center;
   font-family:Helvetica;
+  border-radius: 20px;
+  border:1px solid silver;
+  background-color: white;
+  opacity: 0.7;
+ 
 }
 
+.menu {
+  
+  height:100%;
+  width:100%;
+  
+  
+  display: inline;
+  vertical-align:middle;
+  text-align:center;
+  font-family:Helvetica;
+  margin: auto;
+}
 
 #iwindow svg circle {
   fill: MidnightBlue;
   stroke: Gainsboro;
 }
 
-.leyend {
+.legend {
+   pointer-events: none;
    position: fixed;
    right: 0.5cm;
    bottom: 1cm;
-   width: 1cm;
-   height: 5cm; 
-   opacity: 0.8;
+   width: 2cm;
+   height: 6cm; 
+   opacity: 0.9;
 }
 
 .leyend svg {
-  pointer-events: none;
 }
 .axis path,
 .axis line {
