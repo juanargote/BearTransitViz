@@ -169,12 +169,13 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
     .on("click", function(d){
-      var coordinates = pmTOlonlat(d.pm, shape)
-      center = new google.maps.LatLng(coordinates[1], coordinates[0])
-      map.panTo(center)
-      map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/4)
-      console.log(d)
-      if (catchmentStopId == null || catchmentStopId != d.id){
+     
+      //console.log(d)
+      if (catchmentStopId == null || catchmentStopId != d.id){ // if the active stop is not this
+         var coordinates = pmTOlonlat(d.pm, shape)
+        center = new google.maps.LatLng(coordinates[1], coordinates[0])
+        map.panTo(center)
+        map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/4)
         catchmentStopId = d.id
         setCatchmentAreas()
         inter.show()
@@ -183,7 +184,7 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
         } else {
           inter.first.text("Hurry up!!!")
         }
-      } else {
+      } else { // if the active stop is this one then deativate it
         catchmentStopId = null
         eraseCatchmentAreas()
         inter.hide()
