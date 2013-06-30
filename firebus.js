@@ -5,11 +5,11 @@ var predictions = d3.scale.linear()
 var buses = {}
 var stops = {}
 var stopBisect = d3.scale.linear()
-var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 4, 10])
+var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 6, 10])
 var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
 var getStopBorder = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,3,5])
 var getBusRadius = d3.scale.pow().exponent(2).domain([0,13, 14, 20]).range([0,5,9.5,17])
-var getBusBorder = d3.scale.pow().exponent(2).domain([0,13, 14, 20]).range([0,1,3,5])
+var getBusBorder = d3.scale.pow().exponent(2).domain([0,11, 15, 20]).range([0,0,2,4])
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
@@ -24,46 +24,10 @@ var catch1Options = {fillColor:'gray',
                       strokeOpacity:1,
                       strokeWeight:2}
 
-function initializeFirebase() {
-  var f = new Firebase("https://beartransitviz.firebaseio.com/bear-transit/raw_location");
-  var fStops = new Firebase("https://beartransitviz.firebaseio.com/bear-transit/stops_prediction");
-  d3.timer(function(){ // makes sure the div has been created, otherwise we would not be able to plot anything
-    if (!d3.select("#Overlay").empty()) {
-
-      f.once("value", function(s) { // downloads the list of buses, updates the list of buses, creates an svg for each bus (calls the add circle) and deletes any bus svg that already exists
-
-
-        buses = s.val()
-        console.log(s.val())
-        console.log(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
-        // var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses).filter(function(d,i,a) {return d.value.pm != undefined}))
-        
-        // d3buses.enter().append("svg")
-        //   .attr("class","buses")
-        //   .attr("id", function(d){return d.key})
-          
-        // d3buses.exit().remove()
-
-        d3.json("P.json",function(data){
-          pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
-          data.features.forEach(function(s){ // for each shape
-            shape = s
-            // predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
-            //   .range(shape.geometry.coordinates.map(function(d,i){return i}))
-            //paintRoute(shape)
-          })
-        })
-      });
-      
-      f.on("child_removed", function(s) {
-        var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
-        d3buses.exit().remove()
-      });
-
-      return true
-    }
-  })  
-}
+//       f.on("child_removed", function(s) {
+//         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
+//         d3buses.exit().remove()
+//       });
 
 function resizeStops(){
   var radius = getStopRadius(map.getZoom())
@@ -79,6 +43,9 @@ function resizeStops(){
     d3Stop.select("circle").datum(d).attr("r", radius)
       .attr("cx",(radius+border))
       .attr("cy",(radius+border))
+
+    // Relocate the group
+    d3Stop.select("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")")
     relocate(this, pmTOlonlat(d.pm, shape))
   })
 }
@@ -97,6 +64,17 @@ function resizeBuses(){
     d3Bus.select("circle").datum(d).attr("r", radius)
       .attr("cx",(radius+border))
       .attr("cy",(radius+border))
+
+    // Relocate the group
+    d3Bus.select("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")")
+    
+    d3Bus.select("circle").style("stroke-width",border)
+
+    if (map.getZoom() >= 14) {
+      d3Bus.select(".BusIcon").style("opacity",1)
+    } else {
+      d3Bus.select(".BusIcon").style("opacity",0)
+    }
     relocate(this, pmTOlonlat(d.pm, shape))
   })
 }
@@ -120,7 +98,7 @@ function locateBuses(){
 
 function initializeStops(){
   
-  d3.select("#OverlaySvg").selectAll(".stops").data(pre.stops).enter()
+  d3.select("#stopsOverlay").selectAll(".stops").data(pre.stops).enter()
             .append("svg")
             .attr("class","stops")
             .attr("id",function(d,i){return "STOP"+d.id})
@@ -130,7 +108,7 @@ function initializeStops(){
 
 function initializeBuses(){
 
-  d3.select("#OverlaySvg").selectAll(".buses").data(pre.buses.filter(function(b,i,a) {return b.pm != undefined}))
+  d3.select("#busesOverlay").selectAll(".buses").data(pre.buses.filter(function(b,i,a) {return b.pm != undefined}))
     .enter().append("svg")
     .attr("class","buses")
     .attr("id", function(b){return b.id})
@@ -163,9 +141,9 @@ function setCatchmentAreas(){
 function addStop(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
   var radius = getStopRadius(map.getZoom())
   var border = getStopBorder(map.getZoom())
-  var d3Stops = d3.select(this)
+  var d3Stop = d3.select(this)
 
-  d3Stops.selectAll("circle").data([d]).enter().append("circle").attr("r", radius)
+  d3Stop.selectAll("circle").data([d]).enter().append("circle").attr("r", radius)
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
     .on("click", function(d){
@@ -175,7 +153,7 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
          var coordinates = pmTOlonlat(d.pm, shape)
         center = new google.maps.LatLng(coordinates[1], coordinates[0])
         map.panTo(center)
-        map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/4)
+        map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/6)
         catchmentStopId = d.id
         setCatchmentAreas()
         inter.show()
@@ -192,33 +170,40 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
       
     })
     .on("mouseover", function(){
-      d3.select(this).style("fill", "red").style("cursor","pointer")
+      d3.select(this).style("fill", "navy").style("cursor","pointer")
     })
     .on("mouseout", function(){
-      d3.select(this).style("fill", "navy")
+      d3.select(this).style("fill", null)
     })
 
-  d3.select(this)
-    .style("width",(2*(radius + border)) + "px")
+  d3Stop.style("width",(2*(radius + border)) + "px")
     .style("height",(2*(radius + border)) + "px")
 
-  d3Stops.selectAll(".stops circle").style("fill","navy").style("stroke-width", border).style("stroke", "whitesmoke")
+  d3Stop.append("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")")
+  d3Stop.selectAll(".stops circle").style("stroke-width", border)
 }
 
 function addBus(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
-  var radius = 2 + getStopRadius(map.getZoom())
-  var border = getStopBorder(map.getZoom())
-  var d3buses = d3.select(this)
+  var radius = 2 + getBusRadius(map.getZoom())
+  var border = getBusBorder(map.getZoom())
+  var d3Bus = d3.select(this)
 
-  d3buses.append("circle").attr("r", radius)
+  d3Bus.append("circle").attr("r", radius)
     .attr("cx",(radius+border))
     .attr("cy",(radius+border))
 
-  d3.select(this)
-    .style("width",(2*(radius + border)) + "px")
+  d3Bus.style("width",(2*(radius + border)) + "px")
     .style("height",(2*(radius + border)) + "px")
 
-  d3buses.selectAll(".buses circle").style("fill","gold").style("stroke-width", border).style("stroke", "navy")
+  d3Bus.append("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")")
+  d3Bus.select("g").append("path").attr("class","BusIcon").each(loadIcon)
+
+  if (map.getZoom() >= 14) {
+    d3Bus.select(".BusIcon").style("opacity",1)
+  } else {
+    d3Bus.select(".BusIcon").style("opacity",0)
+  }
+  d3Bus.selectAll(".buses circle").style("stroke-width", border)
 }
 
 function pmTOlonlat(pm, shape){
@@ -271,7 +256,7 @@ function paintRoute(shape){
 
 function paintLink(canvas){
 
-  if (canvas.node().getContext) {
+  if (canvas.node().getContext && pre.events != undefined) {
     var projectedLink = canvas.datum()
     var ctx = canvas.node().getContext("2d");
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);

@@ -34,7 +34,9 @@ var inter = {
 //   <div> #iwindo div div
 
 
-inter.window = d3.select("#iwindow")//.append("div").attr("id", "iwindow")
+inter.window = d3.select("#iwindow")
+	.style("opacity",0)
+	.style("z-index",0)
 	.on("click", function(){
 		if (inter.window.style("opacity") == 0){
 			// inter.show()
@@ -44,11 +46,13 @@ inter.window = d3.select("#iwindow")//.append("div").attr("id", "iwindow")
 	})
 	.on("mouseover",function(){ inter.window.style("cursor","pointer")})
 
-inter.subdiv = d3.select("#iwindow div")//inter.window.append("div")
+inter.window.style("bottom", (+inter.window.style("bottom").slice(0,-2) - 300) + "px")
+
+inter.subdiv = d3.select("#iwindow div")
 	//.attr("id","isubdiv")
 	
 
-inter.svg = d3.select("#iwindow svg")//inter.window.append("svg").attr("width", 200).attr("height", 200)
+inter.svg = d3.select("#iwindow svg")
 
 
 inter.g1 = d3.select("#iwindow svg").append("g").attr("transform", "translate(100,100)scale(2)")
@@ -74,13 +78,13 @@ inter.second = d3.select("#iwindow div").append("h2").text("1 min")
 d3.select("#isubdiv div").text("hello")
 
 inter.hide = function(){
-	if (inter.window.style("opacity") != 0) {
+	if (inter.window.style("z-index") != 0) {
 		inter.window.transition().style("bottom", (+inter.window.style("bottom").slice(0,-2) - 300) + "px").style("opacity",0).style("z-index",0)
 	}
 }
 
 inter.show = function(){
-	if (inter.window.style("opacity") == 0) {
+	if (inter.window.style("z-index") == 0) {
 		inter.window.transition().style("bottom", (+inter.window.style("bottom").slice(0,-2) + 300) + "px").style("opacity",1).style("z-index",1)
 	}
 }
@@ -88,9 +92,9 @@ inter.show = function(){
 var legend = {}
 
 legend.append = function(){
-legend.window =  d3.select(".legend")//d3.select("body").append("div").attr("class","legend")
+legend.window =  d3.select(".legend")
 
-legend.svg =  d3.select(".legend svg")//legend.window.append("svg").attr("width","100%").attr("height","100%")
+legend.svg =  d3.select(".legend svg")
 
 legend.width = +legend.window.style("width").slice(0,-2)
 legend.height = +legend.window.style("height").slice(0,-2)

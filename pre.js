@@ -34,6 +34,16 @@ fstops.on("child_changed", function(s) {
   pre.stops = stopsPRE.filter(function(stop){return stop.pm != undefined})
 })
 
+d3.json("P.json",function(data){
+  pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
+  data.features.forEach(function(s){ // for each shape
+    shape = s
+    // predictions.domain(shape.geometry.coordinates.map(function(d){return d[2]}))
+    //   .range(shape.geometry.coordinates.map(function(d,i){return i}))
+    //paintRoute(shape)
+  })
+})
+
 pre.lastStop = function(pm){ //postmile of the bus
       var STOPS = pre.stops.sort(function(a,b){return a.pm - b.pm})
       var i

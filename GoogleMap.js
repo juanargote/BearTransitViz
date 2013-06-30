@@ -10,11 +10,14 @@ function initializeOverlay() {
 
 	overlay.onAdd = function() {
 		
-		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("id","Overlay")
+		var layer = d3.select(this.getPanes().overlayMouseTarget).append("div").attr("id","Overlay").style("opacity",0.85)
 		layer.append("div").attr("id","OverlayCanvas")
 		layer.append("div").attr("id","CatchmentAreas")
 		layer.append("div").attr("id","OverlaySvg")
 		
+		d3.select("#OverlaySvg").append("div").attr("id","stopsOverlay")
+		d3.select("#OverlaySvg").append("div").attr("id","busesOverlay")
+
 		overlay.draw = function() {
 	      	
 	      	overlay.projection = function (coordinates) { // [LON, LAT]
@@ -42,13 +45,12 @@ function initializeMap() {
   map = new google.maps.Map(document.getElementById('map-canvas'),
       mapOptions);
   initializeOverlay()
-  initializeFirebase() // this function is defined in firebus.js
 }
 
 function reprojectOverlays(){
 	console.log(map.getZoom())
-	resizeBuses()
 	resizeStops() //this function is defined in firebus.js
+	resizeBuses()
 	d3.selectAll(".catchment").each(function(d){ relocate(this, d.geometry.coordinates)})
 	if (shape != undefined) {paintRoute(shape)} // this function is defined in firebus.js
 }
