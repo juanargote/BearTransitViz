@@ -30,7 +30,9 @@
   fill: whitesmoke;
 }
 
-
+.buses .BusStopDirection {
+  fill: CornflowerBlue;
+}
 
 .stops svg {
   pointer-events: none;

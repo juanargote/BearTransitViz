@@ -2,14 +2,14 @@
 var shape
 var color = d3.scale.linear().range(["red", "blue"]).domain([0, 1.5*60])
 var predictions = d3.scale.linear()
-var buses = {}
-var stops = {}
-var stopBisect = d3.scale.linear()
+// var buses = {}
+// var stops = {}
+
 var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 6, 10])
 var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
 var getStopBorder = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,3,5])
 var getBusRadius = d3.scale.pow().exponent(2).domain([0,13, 14, 20]).range([0,5,9.5,17])
-var getBusBorder = d3.scale.pow().exponent(2).domain([0,11, 15, 20]).range([0,0,2,4])
+var getBusBorder = d3.scale.pow().exponent(2).domain([0,13, 15, 20]).range([0,0,2.5,3])
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
@@ -57,23 +57,29 @@ function resizeBuses(){
     var d3Bus = d3.select(this)
 
     // Resize the svg container
-    d3Bus.style("width",(2*(radius + border)) + "px")
-      .style("height",(2*(radius + border)) + "px")
+    d3Bus.style("width",(2*(2*radius + border)) + "px")
+      .style("height",(2*(2*radius + border)) + "px")
 
     // Resize the circle
     d3Bus.select("circle").datum(d).attr("r", radius)
-      .attr("cx",(radius+border))
-      .attr("cy",(radius+border))
+      .attr("cx",(2*radius+border))
+      .attr("cy",(2*radius+border))
+      .style("stroke-width",border)
 
-    // Relocate the group
-    d3Bus.select("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")")
-    
-    d3Bus.select("circle").style("stroke-width",border)
+    // Relocate the group for the icons
+
+    d3.select(d3Bus.select(".BusStopDirection").node().parentNode)
+      .attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(d.pm, shape) - 180)+")")
+
+    d3.select(d3Bus.select(".BusIcon").node().parentNode)
+      .attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")")
 
     if (map.getZoom() >= 14) {
       d3Bus.select(".BusIcon").style("opacity",1)
+      d3Bus.select(".BusStopDirection").style("opacity",1)
     } else {
       d3Bus.select(".BusIcon").style("opacity",0)
+      d3Bus.select(".BusStopDirection").style("opacity",0)
     }
     relocate(this, pmTOlonlat(d.pm, shape))
   })
@@ -87,11 +93,17 @@ function relocate(svg, array) {
 }
 
 function locateBuses(){
+  var radius = 2 + getBusRadius(map.getZoom())
+  var border = getBusBorder(map.getZoom())
   pre.buses.forEach(function(s){
     try{
       d3.select("#" + s.id).each(function(d){ relocate(this, pmTOlonlat(s.pm, shape))})
+      d3.select(d3.select("#" + s.id).select(".BusStopDirection").node().parentNode)
+        .attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(s.pm, shape) - 180)+")")
+
     } catch (error) {
       console.log(error)
+      //console.log("translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(s.pm, shape) - 180)+")")
     }
   })
 }
@@ -189,21 +201,25 @@ function addBus(d) { // adds a circle (if there is not one there already) and re
   var d3Bus = d3.select(this)
 
   d3Bus.append("circle").attr("r", radius)
-    .attr("cx",(radius+border))
-    .attr("cy",(radius+border))
+    .attr("cx",(2*radius+border))
+    .attr("cy",(2*radius+border))
+    .style("stroke-width", border)
 
-  d3Bus.style("width",(2*(radius + border)) + "px")
-    .style("height",(2*(radius + border)) + "px")
+  d3Bus.style("width",(2*(2*radius + border)) + "px")
+    .style("height",(2*(2*radius + border)) + "px")
 
-  d3Bus.append("g").attr("transform","translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")")
-  d3Bus.select("g").append("path").attr("class","BusIcon").each(loadIcon)
+  d3Bus.append("g").attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(d.pm, shape) - 180)+")")
+  .append("path").attr("class","BusStopDirection").each(loadIcon)
+
+  d3Bus.append("g").attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")")
+  .append("path").attr("class","BusIcon").each(loadIcon)
 
   if (map.getZoom() >= 14) {
     d3Bus.select(".BusIcon").style("opacity",1)
   } else {
     d3Bus.select(".BusIcon").style("opacity",0)
   }
-  d3Bus.selectAll(".buses circle").style("stroke-width", border)
+  //d3Bus.selectAll(".buses circle")
 }
 
 function pmTOlonlat(pm, shape){
@@ -217,6 +233,21 @@ function pmTOlonlat(pm, shape){
   var lonScale = d3.scale.linear().domain(coor.map(function(d){return d[2]})).range(coor.map(function(d){return d[0]}))
         
   return [lonScale(pm), latScale(pm)]
+}
+
+function shapeLength(shape){
+  var coor = shape.geometry.coordinates
+  return d3.max(coor.map(function(d){return d[2]}))
+}
+
+function shapeDirection(pm, shape, dist){ // returns the direction of the shape in clockwise degrees (12 = 0º)
+  if (dist == undefined) { dist = 0.100} // 100 meters because GTFS reports distance in km
+  var P1 = pmTOlonlat(pm, shape)
+  var P2 = pmTOlonlat(pm+dist, shape)
+
+  var degrees = Math.atan2((P2[1]-P1[1]),(P2[0]-P1[0]))*180/Math.PI
+
+  return 90 - degrees
 }
 
 function paintRoute(shape){
