@@ -25,42 +25,53 @@
     <div class="legend">
       <svg width="100%" height="100%"></svg>
     </div>
+
+    <script type="text/javascript"> // Before doing analysis
+    
+    //loading the route shape
+    d3.json("P.json",function(data){
+      //pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
+      data.features.forEach(function(shapeData){ // for each shape
+        shape = shapeData
+      })
+    })
+
+    </script>
+
     <script type="text/javascript" src="GoogleMap.js"></script>
+    <script type="text/javascript" src="pro.js"></script>
     <script type="text/javascript" src="firebus.js"></script>
-    <script type="text/javascript" src="pre.js"></script>
+    
     <script type="text/javascript" src="controls.js"></script>
     <script type="text/javascript">
-    var s
-    predictions.range([30,40])
     
-    predictions = function(pm){
-     if (pm < pre.stops[0].pm) {pm = pm + pre.links.slice(-1)[0]} 
+
+
+
+    var s
+    
+    var predictions = function(pm){
+     //if (pm < pre.stops[0].pm) {pm = pm + pre.links.slice(-1)[0]} 
 
      var time = new Date().getTime()/1000
 
-      return pre.predict(pm) - time 
+      return pro.predict(pm) - time 
     }
 
     d3.timer(function(){
-      if (pre.stops != undefined){
+      if (pro.stops != undefined){
+        pro.cess()
         initializeStops()
-        return true
-      } 
-    })
-
-    d3.timer(function(){
-      if (pre.buses != undefined){
-        initializeBuses()
         return true
       } 
     })
 
     setInterval(function(e){
       //console.log(e)
-      if (pre.buses != undefined && pre.stops != undefined && shape != undefined && pre.links != undefined){
+      if (pro.data != undefined && shape != undefined){
         // Advance the animation based on the latest data from firebase and the time elapsed
-        pre.process()
-        pre.predictions()
+        pro.cess()
+        pro.ject()
         // Draw the route
         paintRoute(shape)
         // Relocate the buses
@@ -71,7 +82,7 @@
         }
       }
       return s
-    },100)
+    },200)
 
     </script>
   </body>

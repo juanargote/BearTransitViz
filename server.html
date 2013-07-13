@@ -28,17 +28,21 @@
     }
     </style>
   <body>
-    <script type="text/javascript" src="Fig.js"></script>
-    <script type="text/javascript" src="pre.js"></script>
+    <script type="text/javascript" src="spacetime.js"></script>
+    <script type="text/javascript" src="pro.js"></script>
 
     <script type="text/javascript">
     var s
 
 d3.timer(function(e){
-  if (pre.buses != undefined && pre.stops != undefined && pre.links != undefined){
-    pre.process()
-    pre.predictions()
+  
+  if (pro.data != undefined) {// && pro.events != undefined){// && pre.stops != undefined && pre.links != undefined){
+    pro.cess()
+    pro.ject()
     fig.redraw() 
+    // pre.process()
+    // pre.predictions()
+    
   }
   return s
 })

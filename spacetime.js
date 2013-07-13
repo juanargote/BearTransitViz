@@ -50,7 +50,7 @@ fig.redraw = function(){}
 
 fig.draw = function(data){ 
   d3.json("P.json",function(data){
-    pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
+    //pre.links = data.features[0].geometry.coordinates.map(function(link){ return link[2]})
     Xscale.domain([0,5.3349382621026544])
 
   	fig.select.append("g")
@@ -77,6 +77,37 @@ fig.draw = function(data){
       
       fig.select.selectAll(".prediction").remove()
 
+      for (var trip in pro.trips) {
+        fig.select.append("g")
+          .attr("class", "prediction") // ATTENTION
+          .append("path")
+          .attr("class", "line")
+          .attr("d", series(pro.trips[trip]))
+          .style("stroke", "orange")
+          .style("stroke-width", 10)
+      //   fig.select.append("g")
+      //     .attr("class", "prediction") // ATTENTION
+      //     .append("path")
+      //     .attr("class", "line")
+      //     .attr("d", series(pro.copy[trip]))
+      //     .style("stroke","purple")
+
+      }
+      pro.loops.forEach(function(d) {
+        fig.select.append("g")
+          .attr("class", "prediction") // ATTENTION
+          .append("path")
+          .attr("class", "line")
+          .attr("d", series(d))
+      })
+      fig.select.append("g")
+          .attr("class", "prediction") // ATTENTION
+          .append("path")
+          .attr("class", "line")
+          .style("stroke","purple")
+          .style("stroke-width",5)
+          .attr("d", series(pro.events))
+
       try {
       fig.select.append("g")
           .attr("class", "prediction") // ATTENTION
@@ -88,7 +119,7 @@ fig.draw = function(data){
       }
       d3.select("#yaxis").remove()
 
-      Yscale.domain([time- 300, time +300])
+      Yscale.domain([time- 3000, time +3000])
 
       fig.select.append("g")
         .attr("class", "y axis")
@@ -104,11 +135,11 @@ fig.draw = function(data){
 
       fig.select.selectAll(".stops").remove()
 
-      pre.stops.forEach(function(stop){
+      pro.stops.forEach(function(stop){
         stop.arrivals.forEach(function(arrival){
           fig.select.append("circle").attr("class", "stops")
             .attr("cx", Xscale(stop.pm))
-            .attr("cy", Yscale(arrival+stop.ts))
+            .attr("cy", Yscale(arrival.time+stop.ts))
             .attr("r", 3)
             .style("fill","red")
         })
@@ -116,11 +147,11 @@ fig.draw = function(data){
 
       fig.select.selectAll(".buses").remove()
 
-      pre.buses.forEach(function(bus){
+      pro.buses.forEach(function(bus){
         //console.log(bus.ts)
         fig.select.append("circle").attr("class", "buses")
           .attr("cx", Xscale(bus.pm))
-          .attr("cy", Yscale(bus.ts/1000))
+          .attr("cy", Yscale(bus.ts))
           .attr("r", 3)
           .style("fill","navy")
       })

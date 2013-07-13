@@ -121,7 +121,8 @@ gradient.append("svg:stop")
     .attr("stop-opacity", 1);
 
 })
-colorscale = d3.scale.linear().domain(color.domain().map(function(d){return d/60})).range([legend.height,0])
+colorscale = d3.scale.linear().domain([d3.min(color.domain().map(function(d){return d/60})), d3.max(color.domain().map(function(d){return d/60}))])
+	.range([legend.height,0])
 
 coloraxis = d3.svg.axis()
 	    .scale(colorscale)

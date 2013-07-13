@@ -1,9 +1,8 @@
+var display = {}
 
-var shape
-var color = d3.scale.linear().range(["red", "blue"]).domain([0, 1.5*60])
-var predictions = d3.scale.linear()
-// var buses = {}
-// var stops = {}
+var color = d3.scale.linear().range(["black", "red", "blue"]).domain([0,0, 30*60])
+
+
 
 var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 6, 10])
 var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
@@ -13,21 +12,16 @@ var getBusBorder = d3.scale.pow().exponent(2).domain([0,13, 15, 20]).range([0,0,
 // Catchment Areas Variables
 var walkingSpeed = 4 / Math.sqrt(2) //[km/hr]
 var catchmentStopId = null
-var lastUpdate
-var r1 = null
-var timeLeft = null
+
 var center
 var catch1 = new google.maps.Circle()
 var catch1Options = {fillColor:'gray',
                       fillOpacity:0.5,
-                      strokeColor:"black",
-                      strokeOpacity:1,
-                      strokeWeight:2}
+                       strokeColor:"gray",
+                       strokeOpacity:0.5,
+                       strokeWeight:2
+                    }
 
-//       f.on("child_removed", function(s) {
-//         var d3buses = d3.select("#OverlaySvg").selectAll(".buses").data(d3.entries(buses))
-//         d3buses.exit().remove()
-//       });
 
 function resizeStops(){
   var radius = getStopRadius(map.getZoom())
@@ -95,22 +89,28 @@ function relocate(svg, array) {
 function locateBuses(){
   var radius = 2 + getBusRadius(map.getZoom())
   var border = getBusBorder(map.getZoom())
-  pre.buses.forEach(function(s){
-    try{
-      d3.select("#" + s.id).each(function(d){ relocate(this, pmTOlonlat(s.pm, shape))})
-      d3.select(d3.select("#" + s.id).select(".BusStopDirection").node().parentNode)
-        .attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(s.pm, shape) - 180)+")")
+  
+  var allBuses = d3.select("#busesOverlay").selectAll(".buses").data(pro.projectedBuses)
+  
+  allBuses.enter().append("svg")
+    .attr("class","buses")
+    .attr("id", function(b){return b.id})
+    .each(function(d){console.log(d)})
+    .each(addBus)
+  
+  allBuses.exit().remove()
 
-    } catch (error) {
-      console.log(error)
-      //console.log("translate("+(radius + border)+","+(radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(s.pm, shape) - 180)+")")
-    }
+  allBuses.each(function(bus){ 
+    relocate(this, pmTOlonlat(bus.pm, shape))
+    d3.select(d3.select(this).select(".BusStopDirection").node().parentNode)
+      .attr("transform","translate("+(2*radius + border)+","+(2*radius + border)+")"+"scale("+(radius/16)+")rotate("+ (shapeDirection(bus.pm, shape) - 180)+")")
   })
+
 }
 
 function initializeStops(){
   
-  d3.select("#stopsOverlay").selectAll(".stops").data(pre.stops).enter()
+  d3.select("#stopsOverlay").selectAll(".stops").data(pro.stops).enter()
             .append("svg")
             .attr("class","stops")
             .attr("id",function(d,i){return "STOP"+d.id})
@@ -120,7 +120,7 @@ function initializeStops(){
 
 function initializeBuses(){
 
-  d3.select("#busesOverlay").selectAll(".buses").data(pre.buses.filter(function(b,i,a) {return b.pm != undefined}))
+  d3.select("#busesOverlay").selectAll(".buses").data(display.buses.filter(function(b,i,a) {return b.pm != undefined}))
     .enter().append("svg")
     .attr("class","buses")
     .attr("id", function(b){return b.id})
@@ -135,19 +135,30 @@ function eraseCatchmentAreas(){
 
 function setCatchmentAreas(){
 
-  try{    
-          var now = new Date().getTime()/1000
-          var arrivals = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].arrivals
-          var ts = pre.stops.filter(function(d){return d.id == catchmentStopId})[0].ts
-          var timeLeft = (arrivals[0] + ts - now)/60 //in [min]
-          r1 = Math.max(10,1000*((arrivals[0] + ts - now)/3600)*walkingSpeed)
-          catch1.setRadius(r1)
-          catch1.setOptions(catch1Options)
-          catch1.setCenter(center)
-          catch1.setMap(map)
-        } catch (err) {
-          console.log('index not found')
-        }  
+  try {    
+    var stop = pro.stops.filter(function(d){return d.id == catchmentStopId})[0]
+    var timeLeft = predictions(stop.pm) / 60
+    inter.subtitle.text(stop.id)
+    if (timeLeft > 1) {
+      inter.first.text(timeLeft.toFixed(0) + " min")
+    } else {
+      if (timeLeft < 0) {
+        inter.first.text("No Service")
+      } else {
+        inter.first.text("Arriving")
+      }
+      
+    }
+    inter.second.text("")    
+
+    catch1.setRadius(Math.max(10,1000*((timeLeft)/60)*walkingSpeed))
+    catch1.setOptions(catch1Options)
+    catch1.setCenter(center)
+    catch1.setMap(map)
+
+  } catch (err) {
+    console.log('index not found')
+  }  
 }
 
 function addStop(d) { // adds a circle (if there is not one there already) and resizes the svg so that the circle is in the center
@@ -160,7 +171,6 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
     .attr("cy",(radius+border))
     .on("click", function(d){
      
-      //console.log(d)
       if (catchmentStopId == null || catchmentStopId != d.id){ // if the active stop is not this
          var coordinates = pmTOlonlat(d.pm, shape)
         center = new google.maps.LatLng(coordinates[1], coordinates[0])
@@ -169,11 +179,7 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
         catchmentStopId = d.id
         setCatchmentAreas()
         inter.show()
-        if (timeLeft > 1) {
-          inter.first.text(timeLeft + "min")
-        } else {
-          inter.first.text("Hurry up!!!")
-        }
+
       } else { // if the active stop is this one then deativate it
         catchmentStopId = null
         eraseCatchmentAreas()
@@ -287,13 +293,13 @@ function paintRoute(shape){
 
 function paintLink(canvas){
 
-  if (canvas.node().getContext && pre.events != undefined) {
+  if (canvas.node().getContext && pro.events != undefined) {
     var projectedLink = canvas.datum()
     var ctx = canvas.node().getContext("2d");
     var lingrad = ctx.createLinearGradient(projectedLink[0][0], projectedLink[0][1],projectedLink[1][0],projectedLink[1][1]);
     var linkLength = projectedLink[1][2]-projectedLink[0][2]
 
-    pre.events.filter(function(d){return d.type == "bus"}).forEach(function(bus){
+    pro.events.filter(function(d){return d.type == "bus"}).forEach(function(bus){
       if (projectedLink[0][2] <= bus.pm && bus.pm <= projectedLink[1][2]) {
         var loc = (bus.pm - projectedLink[0][2])/linkLength
         if (0 <= loc && loc <= 1) {
