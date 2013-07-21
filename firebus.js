@@ -4,6 +4,7 @@ var color = d3.scale.linear().range(["black", "red", "blue"]).domain([0,0, 30*60
 
 
 
+// Scales to get the size of the different map elements with respect the map zoom level
 var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 6, 10])
 var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
 var getStopBorder = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,3,5])
@@ -21,7 +22,6 @@ var catch1Options = {fillColor:'gray',
                        strokeOpacity:0.5,
                        strokeWeight:2
                     }
-
 
 function resizeStops(){
   var radius = getStopRadius(map.getZoom())
@@ -233,11 +233,7 @@ function pmTOlonlat(pm, shape){
   if (pm == undefined){
     pm = 0
   }
-
-  var coor = shape.geometry.coordinates
-  var latScale = d3.scale.linear().domain(coor.map(function(d){return d[2]})).range(coor.map(function(d){return d[1]}))
-  var lonScale = d3.scale.linear().domain(coor.map(function(d){return d[2]})).range(coor.map(function(d){return d[0]}))
-        
+          
   return [lonScale(pm), latScale(pm)]
 }
 
