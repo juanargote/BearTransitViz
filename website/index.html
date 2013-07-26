@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Visualizing Arrival Predictions</title>
+<style>
+
+@import url(//fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700);
+@import url(style.css);
+
+#example1 { min-height: 155px; }
+#example2a { min-height: 153px; }
+#example2b { min-height: 255px; }
+
+</style>
+<div id="body">
+
+<h1>Visualizing Arrival Predictions</h1>
+
+<h2>Introduction</h2>
+
+<p><b>Real-time arrival predictions</b> can improve the usability of transit and create a better overall experience for the riders. However, this information in generally presented statically in a maze of unintuitive interfaces. If a user wants to retrieve the arrival information at a particular stop in a route, they are generally forced to navigate to a different interface, where the information will be numerically presented to them.
+
+<p>Our goal is to provide a one-stop-shop where transit users can easily infer the next bus arrival information for any point along a particular route. In order to do so, our web application combines the reported position of the buses and the arrival prediction information to color code arrival estimations along the entire path of the route. Therefore, the passenger only needs to glance at the color surrounding her stop in order to infer the time until the next bus arrival. This visualization also includes geo-fencing, to aid in determining which stop to access.
+
+<div id="example1"></div>
+
+<h2>How to use it</h2>
+
+<p>Cubism fetches time series data incrementally: after the initial display, Cubism reduces server load by polling only the most recent values. Cubism renders incrementally, too, using <a href="http://www.w3.org/TR/2dcontext/">Canvas</a> to shift charts one pixel to the left. This approach lets Cubism scale easily to hundreds of metrics updating every ten seconds! Despite asynchronous fetching, rendering is synchronized so that charts update simultaneously, further improving performance and readability.
+
+<h2>How it works</h2>
+
+<footer>
+  <span style="float:right;">
+    Created by <a href="www.ocf.berkeley.edu/~argote">Juan Argote</a> and Jean C. Doig. <br/>
+    Email us at juan.argote @ berkeley.edu and jcdoig @ berkeley.edu
+  </span>
+  VUD Lab 2013
+</footer>
+</div>
+
+<script src="d3.v2.js"></script>
+<script src="cubism.v1.js"></script>
+<script src="highlight.min.js"></script>
+<script>
+
+function random(name) {
+  var value = 0,
+      values = [],
+      i = 0,
+      last;
+  return context.metric(function(start, stop, step, callback) {
+    start = +start, stop = +stop;
+    if (isNaN(last)) last = start;
+    while (last < stop) {
+      last += step;
+      value = Math.max(-10, Math.min(10, value + .8 * Math.random() - .4 + .2 * Math.cos(i += .2)));
+      values.push(value);
+    }
+    callback(null, values = values.slice((start - stop) / step));
+  }, name);
+}
+
+</script>
+<script>
+
+var context = cubism.context()
+    .serverDelay(0)
+    .clientDelay(0)
+    .step(1e3)
+    .size(960);
+
+var foo = random("foo"),
+    bar = random("bar");
+
+d3.select("#example1").call(function(div) {
+
+  div.append("div")
+      .attr("class", "axis")
+      .call(context.axis().orient("top"));
+
+  div.selectAll(".horizon")
+      .data([foo, bar, foo.add(bar), foo.subtract(bar)])
+    .enter().append("div")
+      .attr("class", "horizon")
+      .call(context.horizon().extent([-20, 20]));
+
+  div.append("div")
+      .attr("class", "rule")
+      .call(context.rule());
+
+});
+
+d3.select("#example2a").call(function(div) {
+  div.datum(foo);
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(120)
+        .mode("mirror")
+        .colors(["#bdd7e7","#bae4b3"])
+        .title("Area (120px)")
+        .extent([-10, 10]));
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(30)
+        .mode("mirror")
+        .colors(["#bdd7e7","#bae4b3"])
+        .title("Area (30px)")
+        .extent([-10, 10]));
+});
+
+d3.select("#example2b").call(function(div) {
+  div.datum(foo);
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(120)
+        .colors(["#bdd7e7","#bae4b3"])
+        .title("Horizon, 1-band (120px)")
+        .extent([-10, 10]));
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(60)
+        .colors(["#6baed6","#bdd7e7","#bae4b3","#74c476"])
+        .title("Horizon, 2-band (60px)")
+        .extent([-10, 10]));
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(40)
+        .colors(["#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354"])
+        .title("Horizon, 3-band (40px)")
+        .extent([-10, 10]));
+
+  div.append("div")
+      .attr("class", "horizon")
+      .call(context.horizon()
+        .height(30)
+        .colors(["#08519c","#3182bd","#6baed6","#bdd7e7","#bae4b3","#74c476","#31a354","#006d2c"])
+        .title("Horizon, 4-band (30px)")
+        .extent([-10, 10]));
+
+});
+
+// On mousemove, reposition the chart values to match the rule.
+context.on("focus", function(i) {
+  d3.selectAll(".value").style("right", i == null ? null : context.size() - i + "px");
+});
+
+</script>
