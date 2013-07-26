@@ -220,3 +220,9 @@ h1, h2 {
   opacity: .2;
   z-index: 2;
 }
+
+iframe {
+  width: 820px;
+  height: 500px;
+  border: 1px solid #DEDEDE;
+}
