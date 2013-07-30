@@ -64,7 +64,7 @@
     }
 
     d3.timer(function(){
-      if (pro.stops != undefined){
+      if (pro.stops != undefined && !d3.select("#stopsOverlay").empty()){
         pro.cess()
         initializeStops()
         return true

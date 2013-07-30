@@ -108,7 +108,6 @@ function locateBuses(){
 }
 
 function initializeStops(){
-  
   d3.select("#stopsOverlay").selectAll(".stops").data(pro.stops).enter()
             .append("svg")
             .attr("class","stops")
