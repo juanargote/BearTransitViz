@@ -26,7 +26,13 @@ pro.cess = function(){
     })
   })
   for (var trip in pro.trips) {
-    pro.trips[trip].sort(function(a,b){return a.time-b.time})
+    pro.trips[trip].sort(function(a,b){
+      if (a.time != b.time) {
+        return a.time-b.time
+      } else {
+        return a.pm -b.pm
+      }
+    })
     
     // the first event on each trip should be the bus, if not it means that we have obsolete data.
     
@@ -36,9 +42,12 @@ pro.cess = function(){
         pro.trips[trip].shift() // eliminates all entries before the bus
       }
     }
+
     pro.trips[trip].forEach(function(d,i,a){ // check sequential
       if (a[i-1] != undefined) {
+        //if (d.pm > 5.3349382621026544) {console.log("WTF")}
         while (a[i-1].pm > d.pm) {
+          //console.log(d.pm, a[i-1].pm)
           d.pm = 5.3349382621026544 + d.pm
         }
       }

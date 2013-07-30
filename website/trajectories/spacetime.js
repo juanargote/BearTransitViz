@@ -1,5 +1,5 @@
 var fig = {}
-
+time = new Date().getTime()/1000
 
 var margin = {top: 20, right: 100, bottom: 20, left: 150},
     width = 960 - margin.left - margin.right,
@@ -73,7 +73,7 @@ fig.draw = function(data){
 
     
     fig.redraw = function(){
-      var time = new Date().getTime()/1000
+      //var time = new Date().getTime()/1000
       
       fig.select.selectAll(".prediction").remove()
 
