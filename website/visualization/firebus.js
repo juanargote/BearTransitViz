@@ -95,7 +95,6 @@ function locateBuses(){
   allBuses.enter().append("svg")
     .attr("class","buses")
     .attr("id", function(b){return b.id})
-    .each(function(d){console.log(d)})
     .each(addBus)
   
   allBuses.exit().remove()
