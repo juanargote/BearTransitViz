@@ -48,7 +48,6 @@ function initializeMap() {
 }
 
 function reprojectOverlays(){
-	console.log(map.getZoom())
 	resizeStops() //this function is defined in firebus.js
 	resizeBuses()
 	d3.selectAll(".catchment").each(function(d){ relocate(this, d.geometry.coordinates)})

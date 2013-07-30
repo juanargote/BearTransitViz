@@ -3,9 +3,9 @@ var fig = {}
 
 
 
-var margin = {top: 20, right: 100, bottom: 20, left: 150},
-    width = 960 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
+var margin = {top: 20, right: 40, bottom: 20, left: 150},
+    width = 800 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
 // SVG
 fig.select = d3.select("body").append("svg")
@@ -38,6 +38,7 @@ var Xaxis = d3.svg.axis()
 var Yaxis = d3.svg.axis()
     .scale(Yscale)
     .ticks(10)
+    .tickFormat(function(d){return moment(d*1000).zone("-07:00").format("hh:mm:ss")})
     .orient("left");
 
 // DATA SERIES
