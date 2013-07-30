@@ -29,20 +29,34 @@
     </style>
   <body>
     <script type="text/javascript" src="spacetime.js"></script>
-    <script type="text/javascript" src="pro.js"></script>
+    <script type="text/javascript" src="firebus2mod.js"></script>
 
     <script type="text/javascript">
     var s
+    var displayTime
+    var currentTime
+
+
+
 
 d3.timer(function(e){
-  
+
+
   if (pro.data != undefined) {// && pro.events != undefined){// && pre.stops != undefined && pre.links != undefined){
+    var speed = 20
+    var Time2Display = d3.scale.linear()
+      .domain([0, (1373560200 - 1373555700)/speed])
+      .range([1373555700, 1373560200])
+
+
+    currentTime = new Date().getTime()/1000
+    displayTime = Time2Display((currentTime % 86400) % ((1373560200 - 1373555700) / speed))
     pro.cess()
     pro.ject()
     fig.redraw() 
     // pre.process()
     // pre.predictions()
-    
+    //return true
   }
   return s
 })

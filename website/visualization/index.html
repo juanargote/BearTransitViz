@@ -39,7 +39,7 @@
     </script>
 
     <script type="text/javascript" src="GoogleMap.js"></script>
-    <script type="text/javascript" src="pro.js"></script>
+    <script type="text/javascript" src="firebus2mod.js"></script>
     <script type="text/javascript" src="firebus.js"></script>
     
     <script type="text/javascript" src="controls.js"></script>
@@ -50,12 +50,17 @@
 
     var s
     
+    var displayTime
+    var currentTime
+
+
+
     var predictions = function(pm){
      //if (pm < pre.stops[0].pm) {pm = pm + pre.links.slice(-1)[0]} 
 
-     var time = new Date().getTime()/1000
+     //var time = new Date().getTime()/1000
 
-      return pro.predict(pm) - time 
+      return pro.predict(pm) - displayTime 
     }
 
     d3.timer(function(){
@@ -69,6 +74,14 @@
     setInterval(function(e){
       //console.log(e)
       if (pro.data != undefined && shape != undefined){
+        var speed = 20
+        var Time2Display = d3.scale.linear()
+          .domain([0, (1373560200 - 1373555700)/speed])
+          .range([1373555700, 1373560200])
+
+        currentTime = new Date().getTime()/1000
+        displayTime = Time2Display((currentTime % 86400) % ((1373560200 - 1373555700) / speed))
+
         // Advance the animation based on the latest data from firebase and the time elapsed
         pro.cess()
         pro.ject()
@@ -82,7 +95,7 @@
         }
       }
       return s
-    },200)
+    },50)
 
     </script>
   </body>
