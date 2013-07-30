@@ -81,7 +81,7 @@ fig.draw = function(data){
           .attr("class", "line")
           .attr("d", series(pro.trips[trip]))
           .style("stroke", "orange")
-          .style("stroke-width", 10)
+          .style("stroke-width", 4)
       //   fig.select.append("g")
       //     .attr("class", "prediction") // ATTENTION
       //     .append("path")
@@ -102,7 +102,7 @@ fig.draw = function(data){
           .append("path")
           .attr("class", "line")
           .style("stroke","purple")
-          .style("stroke-width",5)
+          .style("stroke-width",6)
           .attr("d", series(pro.events))
 
       try {
