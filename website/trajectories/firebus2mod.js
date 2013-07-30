@@ -37,7 +37,6 @@ pro.cess = function(){
     //console.log(trip_data)
     pro.trips[pro.nest[trip_data].key] = pro.nest[trip_data].values
     pro.trips[pro.nest[trip_data].key].forEach(function(d){
-      d.time = +d.time // 1000
       d.type = "stop"
     })
   }  
@@ -50,10 +49,15 @@ pro.cess = function(){
   for (var stop_data in pro.nest){
     //console.log(trip_data)
     var arrivals = pro.nest[stop_data].values
+    var pm = pro.nest[stop_data].values[0].pm
+
+    if (pm > 5.3349382621026544) {
+      pm = pm - 5.3349382621026544
+    }
     arrivals.forEach(function(d){
       //d.time = +d.time / 1000
     })
-    pro.stops.push({"pm":pro.nest[stop_data].values[0].pm, "id":pro.nest[stop_data].values[0].stop_id, "ts":0, "arrivals":arrivals})
+    pro.stops.push({"pm":pm, "id":pro.nest[stop_data].values[0].stop_id, "ts":0, "arrivals":arrivals})
   }  
 
   pro.buses = []
