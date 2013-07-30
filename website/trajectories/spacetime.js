@@ -3,7 +3,7 @@ var fig = {}
 
 
 
-var margin = {top: 20, right: 40, bottom: 20, left: 150},
+var margin = {top: 0, right: 40, bottom: 0, left: 100},
     width = 800 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
@@ -90,13 +90,13 @@ fig.draw = function(data){
       //     .style("stroke","purple")
 
       }
-      pro.loops.forEach(function(d) {
-        fig.select.append("g")
-          .attr("class", "prediction") // ATTENTION
-          .append("path")
-          .attr("class", "line")
-          .attr("d", series(d))
-      })
+      // pro.loops.forEach(function(d) {
+      //   fig.select.append("g")
+      //     .attr("class", "prediction") // ATTENTION
+      //     .append("path")
+      //     .attr("class", "line")
+      //     .attr("d", series(d))
+      // })
       fig.select.append("g")
           .attr("class", "prediction") // ATTENTION
           .append("path")
@@ -125,7 +125,7 @@ fig.draw = function(data){
       .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
-        .attr("dy", "-6.71em")
+        .attr("dy", "-4.71em")
         .attr("font-size", "18px")
         .style("text-anchor", "end")
         .text("Unix time in sec");
