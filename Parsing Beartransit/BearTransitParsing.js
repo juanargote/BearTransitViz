@@ -42,7 +42,7 @@ var mInterval = setInterval(function(){
 													pm: perimeter.features[0].geometry.properties.stops.filter(function(p){return (p[1] === d.entity.trip_update.stop_time_update.stop_id);})[0][0],
 													time: d.entity.trip_update.stop_time_update.arrival.time}});
 			
-
+			results.sort(function(a,b){return (a.trip_id + a.time < b.trip_id + b.time) ? -1 : 1});
 
 			fs.writeFile("data.txt",JSON.stringify(results,null,1),function(err){
 				if (err) {
