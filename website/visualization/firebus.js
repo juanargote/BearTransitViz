@@ -1,6 +1,6 @@
 var display = {}
 
-var color = d3.scale.linear().range(["black", "red", "blue"]).domain([0,0, 30*60])
+var color = d3.scale.linear().range(["black", "#DEDE99", "red"]).domain([0,0, 15*60])
 
 
 
