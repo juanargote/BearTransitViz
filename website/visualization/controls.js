@@ -69,11 +69,12 @@ inter.g2.append("path")
 	.attr("class","BusStopDirection")
 	.each(loadIcon)
 
+d3.select("#iwindow div").append("div").attr("id","subdiv")
 
-inter.title = d3.select("#iwindow div").append("h1").text("Arrivals")
-inter.subtitle = d3.select("#iwindow div").append("h3").text("stop name")
-inter.first = d3.select("#iwindow div").append("h2").text("1 min")
-inter.second = d3.select("#iwindow div").append("h2").text("1 min")
+inter.title = d3.select("#iwindow #subdiv").append("p").text("Arrivals").style("font-weight","bold")
+inter.subtitle = d3.select("#iwindow #subdiv").append("p").text("stop name")
+inter.first = d3.select("#iwindow #subdiv").append("p").text("1 min")
+inter.second = d3.select("#iwindow #subdiv").append("p").text("1 min")
 
 d3.select("#isubdiv div").text("hello")
 
@@ -145,4 +146,9 @@ legend.rect.attr("fill","url(#gradient)")
 }
 
 legend.append()
+
+
+
+
+
 

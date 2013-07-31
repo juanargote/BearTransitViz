@@ -16,6 +16,7 @@
     
     </style>
   <body>
+    
     <div id="map-canvas"></div>
     <div id="iwindow">
       <div></div>
@@ -25,7 +26,7 @@
     <div class="legend">
       <svg width="100%" height="100%"></svg>
     </div>
-
+    <div id="time"></div>
     <script type="text/javascript"> // Before doing analysis
     
     //loading the route shape
@@ -82,6 +83,7 @@
         currentTime = new Date().getTime()/1000
         displayTime = Time2Display((currentTime % 86400) % ((1373560200 - 1373555700) / speed))
 
+        d3.select("#time").text(displayTime)
         // Advance the animation based on the latest data from firebase and the time elapsed
         pro.cess()
         pro.ject()

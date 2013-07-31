@@ -57,7 +57,7 @@ pro.cess = function(){
     arrivals.forEach(function(d){
       //d.time = +d.time / 1000
     })
-    pro.stops.push({"pm":pm, "id":pro.nest[stop_data].values[0].stop_id, "ts":0, "arrivals":arrivals})
+    pro.stops.push({"pm":pm, "id":pro.nest[stop_data].values[0].stop_id, "ts":0, "arrivals":arrivals, "name": pro.nest[stop_data].values[0].name})
   }  
 
   pro.buses = []
@@ -174,10 +174,14 @@ pro.ject = function() {
 }
 
 d3.json("data.json", function(data){
-  pro.data = data
-  pro.data.forEach(function(d){
-    d.time = +d.time
-    d.time = d.time / 1000
+  d3.json("StopNames.json", function(names){
+    console.log(names)
+    pro.data = data
+    pro.data.forEach(function(d){
+      d.time = +d.time
+      d.time = d.time / 1000
+      d.name = names.filter(function(S){ return S.stop_id == d.stop_id})[0].stop_name
+  })
   })
 })
 

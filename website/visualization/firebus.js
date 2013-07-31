@@ -136,7 +136,8 @@ function setCatchmentAreas(){
   try {    
     var stop = pro.stops.filter(function(d){return d.id == catchmentStopId})[0]
     var timeLeft = predictions(stop.pm) / 60
-    inter.subtitle.text(stop.id)
+    inter.subtitle.text("Next Arrival")
+    inter.title.text(stop.name)
     if (timeLeft > 1) {
       inter.first.text(timeLeft.toFixed(0) + " min")
     } else {
