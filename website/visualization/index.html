@@ -6,6 +6,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=visualization"></script>
     <script type="text/javascript" src="d3.v3.min.js"></script>
     <script type="text/javascript" src="firebase.js"></script>
+    <script type="text/javascript" src="moment.js"></script>
     <style>
     html, body, #map-canvas {
       width: 100%;
@@ -83,7 +84,7 @@
         currentTime = new Date().getTime()/1000
         displayTime = Time2Display((currentTime % 86400) % ((1373560200 - 1373555700) / speed))
 
-        d3.select("#time").text(displayTime)
+        d3.select("#time").text(moment(displayTime*1000).zone("-07:00").format("MM/DD/YYYY hh:mm:ss"))
         // Advance the animation based on the latest data from firebase and the time elapsed
         pro.cess()
         pro.ject()
