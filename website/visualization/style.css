@@ -55,9 +55,10 @@
   text-align: center; 
   border-radius: 10px;
   border:1px solid silver;
-  background-color: whitesmoke;
+  background-color: white;
   opacity: 1;
   margin: auto;
+  padding:15px;
 }
 
 #iwindow {

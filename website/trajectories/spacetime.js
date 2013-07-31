@@ -128,7 +128,7 @@ fig.draw = function(data){
         .attr("dy", "-4.71em")
         .attr("font-size", "18px")
         .style("text-anchor", "end")
-        .text("Unix time in sec");
+        .text("Time      ");
 
       fig.select.selectAll(".stops").remove()
 

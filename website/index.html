@@ -13,21 +13,23 @@
 
 <h2>Introduction</h2>
 
-<p><b>Real-time arrival predictions</b> can improve the usability of transit and <b>provide a better overall experience</b> for the riders. However, this information is generally presented statically. Moreover, if a user wants to find information for a particular stop, they generally have to navigate fairly clunky interfaces, where the information will be presented to them numerically.</p>
+<p>Real-time transit arrival predictions can be a great tool for riders. Or they can make transit less friendly with clunky and static interfaces. We created a visualization for transit users to get next bus arrival information at any stop along a route at a glance. The following <b>interactive map</b> shows our visualization.</p>  
 
-<p>Our goal is to provide a one-stop-shop where transit users can <b>infer the next bus arrival</b> information at any stop along a particular route <b>with a single look</b>. Our web application combines the reported position of the buses and the arrival prediction information to color code the route. The following <b>interactive map</b> shows our visualization framework using actual arrival data collected on the <a href="http://pt.berkeley.edu/around/transit/routes">Bear Transit</a> campus shuttle system at <a href="http://www.berkeley.edu/index.html">UC Berkeley</a> from 8am to 10am during July 11th, 2013. The time has been speed up "5x" to present a more dynamic animation. <b>Try zooming in and out, dragging around or clicking on a stop</b>.</p>
+<ul><li>Zoom in and out</li><li>Drag the map</li><li>Click on a stop</li></ul>
 
 <iframe id="fig1" src="/visualization/" marginwidth="0" marginheight="0" scrolling="no"></iframe>
 
+<p> The map uses data collected on the <a href="http://pt.berkeley.edu/around/transit/routes">Bear Transit</a> campus shuttle system at <a href="http://www.berkeley.edu/index.html">UC Berkeley</a> from 8am to 10am on July 11th, 2013. The time has been speed up by a factor of 5.</p>
+
 <h2>How to use it</h2>
 
-<p>You only need to <b>glance at the color surrounding a stop</b> and compare it with bottom right legend to infer the time left until the next bus arrival. To get <b>more accurate information</b>, you just need to <b>click on a particular stop</b> and a window will automatically pop-up. In our example, the window just contains the stop name and the predicted time left until the next arrival in minutes. Other useful information that we could include is: distance between the stop and the next bus to arrive, ammenities surrounding the stop, etc. </p>
+<p>Compare the color surrounding a stop with the legend to infer the time until the next bus arrival. Click on a stop to pop-up a window with numeric information. This particular window just contains the stop name and the time until the next arrival in minutes. Other useful information that one could include is: distance between the stop and the next bus to arrive, ammenities surrounding the stop, etc.</p>
 
-<p>Moreover, when a stop is clicked on, a gray circular catchment area appears. The radius of this area is calculated to determine if you could catch the next bus on time. If you happen to be located within the gray shadowed area, you should be able to catch the next bus at the selected stop by just walking to it at a convenient pace. This is the simplest combination of arrival information and geo-fencing that we could think of, but one can envision more interesting applications (e.g. a mobile app where an alarm could be triggered to alert the user that he/she should start walking to get the next bus).</p>
+<p>In addition, when a stop is clicked, a gray circular catchment area appears. If you are located within the circle, you should be able to catch the next bus at that stop by walking at a casual pace.</p>
 
 <h2>How it works</h2>
 
-
+<p>In a real setting, the application combines real-time bus positions and arrival prediction information to <b>forecast each bus trajectory</b>. A piece-wise linear function constructed from these trajectories is used to define the color mapping along the route. The next figure provides a graphical depiction of how this process would work over time. If you want to know a bit more, take a look at <a href="TRB 14-0840 Argote_Doig.pdf">this</a> small paper.</p>
 
 <iframe id="fig2" src="/trajectories/server.html" marginwidth="0" marginheight="0" scrolling="no"></iframe>
 
@@ -36,7 +38,7 @@
     Created by <a href="www.ocf.berkeley.edu/~argote">Juan Argote</a> and Jean C. Doig. <br/>
     Email us at juan.argote @ berkeley.edu and jcdoig @ berkeley.edu
   </span>
-  VUD Lab 2013
+  <a href="www.vudlab.com">VUD Lab</a> 2013
 </footer>
 </div>
 
