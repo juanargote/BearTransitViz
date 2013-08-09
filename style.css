@@ -1,3 +1,42 @@
+#menu {
+  pointer-events: none;
+  position:fixed;
+  top:65%;
+  left:0%;
+  width: 100%;
+  height: 100%;
+  text-align:center;
+}
+
+#menu div{
+  pointer-events: visible;
+  position: relative;
+  top:0px;
+  border: 2px solid silver;
+  background-color: whitesmoke;
+  opacity: 0.9;
+  display: inline-block;
+  height: 100%;
+  border-radius: 1em;
+  text-align:center;
+  padding: 1em;
+}
+
+
+#legend {
+  pointer-events: none;
+  position:fixed;
+  top:2em;
+  right:0.35em;
+  width: 5.75em;
+  height: 15em;
+  text-align:center;
+  opacity:1;
+  background-color: white;
+  box-shadow: 0px 0px 3px #888888;
+  
+}
+
 #Overlay canvas {
   position: absolute;
 }
@@ -45,52 +84,7 @@
   stroke: white;
 }
 
-#iwindow {
-  pointer-events: none;
-  position: fixed;
-  bottom: 1cm;
-  left: 35%;
-  width: 30%;
-  height: 6cm;
-  text-align: center; 
-  display: block;
-  margin: auto;
-}
 
-#iwindow svg {
-  pointer-events: none;
-  position: absolute;
-  top: -100px;
-  left: -100px;
-}
-
-#iwindow circle {
-  pointer-events: visible;
-  fill: MidnightBlue;
-  stroke: Gainsboro;
-}
-
-#iwindow path {
-  pointer-events: visible;
-}
-
-#iwindow div {
-  position: relative;
-  pointer-events: visible;
-  width: 100%;
-  top: 0px;
-  left: 0%;
-  height: 100%;
-  z-index: -1;
-  text-align: center;
-  font-family:Helvetica;
-  border-radius: 10px;
-  border:1px solid silver;
-  background-color: whitesmoke;
-  opacity: 0.85;
-  
-
-}
 
 .BusStop {
   fill: GoldenRod;
@@ -100,25 +94,6 @@
   fill: silver;
 }
 
-#isubdiv {
-  
- 
-}
-
-
-
-.legend {
-   pointer-events: none;
-   position: fixed;
-   right: 0.5cm;
-   bottom: 1cm;
-   width: 2cm;
-   height: 6cm; 
-   opacity: 0.85;
-}
-
-.leyend svg {
-}
 .axis path,
 .axis line {
   fill: none;

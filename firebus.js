@@ -1,6 +1,6 @@
 var display = {}
 
-var color = d3.scale.linear().range(["black", "red", "blue"]).domain([0,0, 30*60])
+var color = d3.scale.linear().range(["black", "#98fb98", "red"]).domain([0,0, 15*60])
 
 
 
@@ -95,7 +95,6 @@ function locateBuses(){
   allBuses.enter().append("svg")
     .attr("class","buses")
     .attr("id", function(b){return b.id})
-    .each(function(d){console.log(d)})
     .each(addBus)
   
   allBuses.exit().remove()
@@ -109,7 +108,6 @@ function locateBuses(){
 }
 
 function initializeStops(){
-  
   d3.select("#stopsOverlay").selectAll(".stops").data(pro.stops).enter()
             .append("svg")
             .attr("class","stops")
@@ -138,7 +136,8 @@ function setCatchmentAreas(){
   try {    
     var stop = pro.stops.filter(function(d){return d.id == catchmentStopId})[0]
     var timeLeft = predictions(stop.pm) / 60
-    inter.subtitle.text(stop.id)
+    inter.subtitle.text("Next Arrival")
+    inter.title.text(stop.name)
     if (timeLeft > 1) {
       inter.first.text(timeLeft.toFixed(0) + " min")
     } else {
@@ -172,13 +171,18 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
     .on("click", function(d){
      
       if (catchmentStopId == null || catchmentStopId != d.id){ // if the active stop is not this
-         var coordinates = pmTOlonlat(d.pm, shape)
+        
+        d3.selectAll("circle").style("fill",null);
+
+        console.log(d3Stop.selectAll("circle"));
+        var coordinates = pmTOlonlat(d.pm, shape)
         center = new google.maps.LatLng(coordinates[1], coordinates[0])
         map.panTo(center)
         map.panBy(0, d3.select("#map-canvas").style("height").slice(0,-2)/6)
         catchmentStopId = d.id
         setCatchmentAreas()
         inter.show()
+        d3.select(this).style("fill","green")
 
       } else { // if the active stop is this one then deativate it
         catchmentStopId = null
@@ -191,7 +195,9 @@ function addStop(d) { // adds a circle (if there is not one there already) and r
       d3.select(this).style("fill", "navy").style("cursor","pointer")
     })
     .on("mouseout", function(){
-      d3.select(this).style("fill", null)
+      if (catchmentStopId == null || catchmentStopId != d.id){ // if the active stop is not this
+        d3.select(this).style("fill", null)
+      } 
     })
 
   d3Stop.style("width",(2*(radius + border)) + "px")

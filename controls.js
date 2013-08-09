@@ -23,83 +23,81 @@ function loadIcon(){
 	// the legend that shows the colorscale
 
 var inter = {
-	"window":0, //this is the d3 selection of the interphase popup menu (a <div> element)
 	"svg":0,
 	"subdiv":0, // the div where text is going to be displayed
 }
 
-// <div> #iwindow
-// 	<svg> #iwindow svg
-//  <div> #iwindo div 
-//   <div> #iwindo div div
+// MENU
 
-
-inter.window = d3.select("#iwindow")
+inter.menu = d3.select("#menu div") // initial position of the menu
 	.style("opacity",0)
 	.style("z-index",0)
+	.style("top","300px")
+
+d3.selectAll("#menu *") // defines the click for all childen of the element #menu 
 	.on("click", function(){
-		if (inter.window.style("opacity") == 0){
-			// inter.show()
-		} else {
-			inter.hide()
+		if (inter.menu.style("opacity") != 0){
+			inter.hideMenu()
 		}
 	})
-	.on("mouseover",function(){ inter.window.style("cursor","pointer")})
+	.on("mouseover",function(){ inter.menu.style("cursor","pointer")})
 
-inter.window.style("bottom", (+inter.window.style("bottom").slice(0,-2) - 300) + "px")
+inter.hideMenu = function(){ 
+	if (inter.menu.style("z-index") != 0) {
+		inter.menu.transition().style("top", "300px").style("opacity",0).style("z-index",0)
+	}
+}
 
-inter.subdiv = d3.select("#iwindow div")
-	//.attr("id","isubdiv")
+inter.showMenu = function(){
+	if (inter.menu.style("z-index") == 0) {
+		inter.menu.transition().style("top", "0px").style("opacity",1).style("z-index",1)
+	}
+}
+
+inter.menuSVG = inter.menu.append("svg") // creates the svg
+	.style("position","absolute")
+	.style("left",-50)
+	.style("top",-50)
+
+inter.menuSVG.append("g").attr("transform", "translate(50,50)scale(2)") // creates a group to place some icons
+	.call(function(sel){
+		sel.append("circle")
+		.attr("r", 20)
+		.attr("cx",0)
+		.attr("cy",0)
+	})
+	.call(function(sel){
+		sel.append("path")
+		.attr("class","BusStop")
+		.each(loadIcon)
+	})
 	
-
-inter.svg = d3.select("#iwindow svg")
-
-
-inter.g1 = d3.select("#iwindow svg").append("g").attr("transform", "translate(100,100)scale(2)")
-inter.g2 = d3.select("#iwindow svg").append("g").attr("transform", "translate(100,100)scale(2)rotate(270)")
-
-inter.g1.append("circle").attr("r", 20).attr("cx",0).attr("cy",0)
-
-inter.g1.append("path")
-	.attr("class","BusStop")
-	.each(loadIcon)
-
-
-inter.g2.append("path")
+inter.menuSVG.append("g").attr("transform", "translate(50,50)scale(2)rotate(270)") // creates a group to place some icons
+	.append("path")
 	.attr("class","BusStopDirection")
 	.each(loadIcon)
 
+inter.title = inter.menu.append("h1").text("Arrivals")
+inter.subtitle = inter.menu.append("h3").text("stop name")
+inter.first = inter.menu.append("h2").text("1 min")
+inter.second = inter.menu.append("h2").text("1 min")
 
-inter.title = d3.select("#iwindow div").append("h1").text("Arrivals")
-inter.subtitle = d3.select("#iwindow div").append("h3").text("stop name")
-inter.first = d3.select("#iwindow div").append("h2").text("1 min")
-inter.second = d3.select("#iwindow div").append("h2").text("1 min")
+inter.hide = inter.hideMenu
+inter.show = inter.showMenu
 
-d3.select("#isubdiv div").text("hello")
-
-inter.hide = function(){
-	if (inter.window.style("z-index") != 0) {
-		inter.window.transition().style("bottom", (+inter.window.style("bottom").slice(0,-2) - 300) + "px").style("opacity",0).style("z-index",0)
-	}
-}
-
-inter.show = function(){
-	if (inter.window.style("z-index") == 0) {
-		inter.window.transition().style("bottom", (+inter.window.style("bottom").slice(0,-2) + 300) + "px").style("opacity",1).style("z-index",1)
-	}
-}
+// LEGEND
 
 var legend = {}
 
 legend.append = function(){
-legend.window =  d3.select(".legend")
+legend.window =  d3.select("#legend")
 
-legend.svg =  d3.select(".legend svg")
+legend.svg =  d3.select("#legend svg")
 
 legend.width = +legend.window.style("width").slice(0,-2)
 legend.height = +legend.window.style("height").slice(0,-2)
 
-legend.background = legend.svg.append("rect").attr("width","100%").attr("height","100%").style("fill","whitesmoke").style("stroke","silver")
+legend.background = legend.svg.append("rect").attr("width","100%").attr("height","100%").style("fill","white")
 
 legend.rect = legend.svg.append("rect").attr("transform","translate("+(legend.width*0.3)+","+(legend.height*0.05)+")").attr("width","20%").attr("height","90%")
 
