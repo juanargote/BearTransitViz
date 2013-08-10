@@ -40,6 +40,12 @@ function initializeMap() {
   var mapOptions = {
     zoom: 15,
     center: new google.maps.LatLng(37.87, -122.26),
+    mapTypeControl: false,
+    zoomControl: true,
+    zoomControlOptions: {
+      style: google.maps.ZoomControlStyle.SMALL
+    },
+    streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
   map = new google.maps.Map(document.getElementById('map-canvas'),

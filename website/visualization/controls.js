@@ -44,11 +44,13 @@ d3.select("#settings").append("svg")
 	.attr("preserveAspectRatio", "xMidYMid meet")
 
 var colorScales =[
-	d3.scale.linear().range(["white", "gold", "black"]).domain([0,0, 15*60]),
-	d3.scale.linear().range(["black", "green", "red"]).domain([0,0, 15*60]),
-	d3.scale.linear().range(["black", "white", "darkgrey"]).domain([0,0, 15*60]),
+	d3.scale.linear().range(["white", "gold", "navy","black"]).domain([0,0,12*60, 15*60]),
+	d3.scale.linear().range(["black", "lightgreen", "red"]).domain([0,0, 15*60]),
+	d3.scale.linear().range(["black", "white", "darkgrey","red"]).domain([0,0,600, 15*60]),
 	d3.scale.linear().range(["white", "green", "yellow", "red"]).domain([0,0, 300, 15*60])
 	]
+
+color = colorScales[3]
 
 colorScales.forEach(function(cScale,i){
 	var gradient = d3.select("#settings svg").append("svg:defs")
@@ -107,7 +109,7 @@ inter.hideMenu = function(){
 
 inter.showMenu = function(){
 	if (inter.menu.style("z-index") == 0) {
-		inter.menu.transition().style("top", "0px").style("opacity",1).style("z-index",1)
+		inter.menu.transition().style("top", "0px").style("opacity",0.8).style("z-index",1)
 	}
 }
 
