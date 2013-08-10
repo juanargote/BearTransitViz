@@ -1,9 +1,5 @@
 var display = {}
 
-var color = d3.scale.linear().range(["black", "#98fb98", "red"]).domain([0,0, 15*60])
-
-
-
 var getLineWidth = d3.scale.pow().exponent(2).domain([11, 14, 20]).range([2, 6, 10])
 var getStopRadius = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,7.5,15])
 var getStopBorder = d3.scale.pow().exponent(2).domain([11,13, 14, 20]).range([0,0,3,5])

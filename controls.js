@@ -27,6 +27,63 @@ var inter = {
 	"subdiv":0, // the div where text is going to be displayed
 }
 
+
+//SETTINGS
+
+d3.select("#settings")
+	.on("click", function(){
+		d3.select("#settings").transition().style("opacity",0)
+			.style("pointer-events","none")
+	})
+	.on("mouseover",function(){ d3.select("#settings").style("cursor","pointer")})
+
+d3.select("#settings").append("svg")
+	.attr("width","100%")
+	.attr("height","100%")
+	.attr("viewBox","0 0 " + 100 + " " + 75)
+	.attr("preserveAspectRatio", "xMidYMid meet")
+
+var colorScales =[
+	d3.scale.linear().range(["white", "gold", "black"]).domain([0,0, 15*60]),
+	d3.scale.linear().range(["black", "green", "red"]).domain([0,0, 15*60]),
+	d3.scale.linear().range(["black", "white", "darkgrey"]).domain([0,0, 15*60]),
+	d3.scale.linear().range(["white", "green", "yellow", "red"]).domain([0,0, 300, 15*60])
+	]
+
+colorScales.forEach(function(cScale,i){
+	var gradient = d3.select("#settings svg").append("svg:defs")
+	  .append("svg:linearGradient")
+	    .attr("id", "gradient"+i)
+	    .attr("x1", "0%")
+	    .attr("y1", "90%")
+	    .attr("x2", "0%")
+	    .attr("y2", "10%")
+
+	cScale.domain().forEach(function(d,j){
+		var ext = d3.extent(cScale.domain())
+		var col = cScale.range()[j]
+
+		gradient.append("svg:stop")
+		    .attr("offset", function(){return ((d - ext[0])/(ext[1]-ext[0])*100) + "%" })
+		    .attr("stop-color", col)
+		    .attr("stop-opacity", 1);
+
+		})
+	
+	d3.select("#settings svg").append("rect")
+		.attr("x",25*i+5)
+		.attr("y","5%")
+		.attr("width",15)
+		.attr("height","90%")
+		.style("fill","url(#gradient"+i+")")
+		.on("mouseover",function(){ d3.select(this).style("stroke-width",2).style("stroke","black")})
+		.on("mouseout",function(){ d3.select(this).style("stroke-width",null).style("stroke",null)})
+		.on("click", function(){
+			color = cScale
+			d3.select("#colorLegend").attr("fill","url(#gradient"+i+")")
+		})
+})
+
 // MENU
 
 inter.menu = d3.select("#menu div") // initial position of the menu
@@ -92,14 +149,19 @@ var legend = {}
 legend.append = function(){
 legend.window =  d3.select("#legend")
 
+legend.width = 90 //+legend.window.style("width").slice(0,-2)
+legend.height = 200//+legend.window.style("height").slice(0,-2)
+
 legend.svg =  d3.select("#legend svg")
+	.attr("width","100%")
+	.attr("height","100%")
+	.attr("viewBox","0 0 " + legend.width + " " + legend.height)
+	.attr("preserveAspectRatio", "xMinYMin meet")
+	.on("click",function(){
+		d3.select("#settings").transition().style("opacity",1)
+			.style("pointer-events","visible")
+	})
 
-legend.width = +legend.window.style("width").slice(0,-2)
-legend.height = +legend.window.style("height").slice(0,-2)
-
-legend.background = legend.svg.append("rect").attr("width","100%").attr("height","100%").style("fill","white")
-
-legend.rect = legend.svg.append("rect").attr("transform","translate("+(legend.width*0.3)+","+(legend.height*0.05)+")").attr("width","20%").attr("height","90%")
 
 var gradient = legend.svg.append("svg:defs")
   .append("svg:linearGradient")
@@ -120,26 +182,34 @@ gradient.append("svg:stop")
 
 })
 colorscale = d3.scale.linear().domain([d3.min(color.domain().map(function(d){return d/60})), d3.max(color.domain().map(function(d){return d/60}))])
-	.range([legend.height,0])
+	.range([legend.height*0.95,legend.height*0.05])
 
 coloraxis = d3.svg.axis()
 	    .scale(colorscale)
-	    .orient("right")
+	    .orient("left")
 	    .ticks(4);
 
-legend.svg.append("g").attr("transform","translate("+(legend.width*0.5)+","+(legend.height*0.05)+")scale(0.9)")
+legend.svg.append("g").attr("transform","translate("+(legend.width*0.6)+","+(legend.height*0.0)+")")
 	.attr("class", "axis")
+	.call(function(selected){
+		selected.append("rect")
+		.attr("id","colorLegend")
+		.attr("x","0%")
+		.attr("width","40%")
+		.attr("height","100%")
+		.attr("fill","url(#gradient)")
+	})
 	.call(coloraxis)
 	.append("text")
 		.attr("transform", "rotate(-90)")
-		.attr("y", -legend.width*0.2)
+		.attr("y", -legend.width*0.40)
 		.attr("x", -legend.height/2)
-		.attr("dy", "-.50em")
-		.attr("font-size", "100%")
+		.attr("dy", ".00em")
+		.attr("font-size", "90%")
+		.style("fill","grey")
 		.style("text-anchor", "middle")
 		.text("Time until the next arrival (min)")
 
-legend.rect.attr("fill","url(#gradient)")
 }
 
 legend.append()

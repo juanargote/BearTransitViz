@@ -1,3 +1,62 @@
+#menu {
+  pointer-events: none;
+  position:fixed;
+  top:65%;
+  left:0%;
+  width: 100%;
+  height: 100%;
+  text-align:center;
+}
+
+#menu div{
+  pointer-events: visible;
+  position: relative;
+  top:0px;
+  border: 2px solid silver;
+  background-color: whitesmoke;
+  opacity: 0.9;
+  display: inline-block;
+  height: 100%;
+  border-radius: 1em;
+  text-align:center;
+  padding: 1em;
+}
+
+
+#legend {
+  pointer-events: visible;
+  position:fixed;
+  top:2em;
+  right:0.36em;
+  width: 5.75em;
+  height: 12.8em;
+  text-align:center;
+  opacity:1;
+  background-color: white;
+  box-shadow: 0px 0px 3px #777777;
+  cursor: pointer;
+  
+}
+
+#settings {
+  position:fixed;
+  top:35%;
+  right:35%;
+  width: 30%;
+  height: 30%;
+  border-radius: 1em;
+  text-align:center;
+  opacity:1;
+  background-color: white;
+  box-shadow: 1px 1px 5px #777777;
+  padding: 0em;
+  line-height: 50%;
+}
+
+#settings svg {
+  display: inline-block;
+}
+
 #Overlay canvas {
   position: absolute;
 }
@@ -45,78 +104,7 @@
   stroke: white;
 }
 
-#time {
-  pointer-events: none;
-  position: fixed;
-  bottom: 1cm;
-  left: 1cm;
-  width: 140px;
-  height: 20px;
-  text-align: center; 
-  border-radius: 10px;
-  border:1px solid silver;
-  background-color: white;
-  opacity: 1;
-  margin: auto;
-  padding:15px;
-}
 
-#iwindow {
-  pointer-events: none;
-  position: fixed;
-  bottom: 1cm;
-  left: 37.5%;
-  width: 20%;
-  height: 30%;
-  text-align: center; 
-  
-  margin: auto;
-}
-
-#iwindow svg {
-  pointer-events: none;
-  position: absolute;
-  top: -100px;
-  left: -100px;
-}
-
-#iwindow circle {
-  pointer-events: visible;
-  fill: MidnightBlue;
-  stroke: Gainsboro;
-}
-
-#iwindow path {
-  pointer-events: visible;
-}
-
-#iwindow div {
-  margin: auto;
-  
-  z-index: -1;
-  pointer-events: visible;
-  width: 100%;
-  top: 0px;
-  left: 0%;
-  height: 100%;
-  border-radius: 10px;
-  border:1px solid silver;
-  background-color: whitesmoke;
-  opacity: 0.85;
-  text-align: center;
-  vertical-align: middle;
-
-}
-
-#subdiv {
-  pointer-events: none;
-  display: block;
-  padding: 10%;
-  padding-top:10%;
-  text-align: center;
-  font-family:Helvetica;
-  
-}
 
 .BusStop {
   fill: GoldenRod;
@@ -126,31 +114,16 @@
   fill: silver;
 }
 
-#isubdiv {
-  
- 
-}
-
-
-
-.legend {
-   pointer-events: none;
-   position: fixed;
-   right: 0.5cm;
-   bottom: 1cm;
-   width: 2cm;
-   height: 6cm; 
-   opacity: 0.85;
-}
-
-.leyend svg {
-}
 .axis path,
 .axis line {
   fill: none;
-  stroke: grey;
+  stroke: none;
   shape-rendering: crispEdges;
 }
 .axis text {
   font-family:Helvetica;
+}
+
+#fig1 h1 {
+  line-height: 3em;
 }
